@@ -1,0 +1,868 @@
+{
+  "canonicalHost": "https://www.medmaths.com",
+  "canonicalPreference": "www",
+  "adSenseSafety": {
+    "noAdsNearInputsOrButtons": true,
+    "noEncouragingClicks": true,
+    "hidePlaceholdersWhenAdsNotLoaded": true
+  },
+  "pages": [
+    {
+      "url": "https://www.medmaths.com/",
+      "type": "main",
+      "canonical": "https://www.medmaths.com/",
+      "robots": "index,follow",
+      "categoryKey": null,
+      "displayName": "MedMaths",
+      "title": "Medication Dose Calculators | IV, Tablet & mg to mL",
+      "primaryKeyword": "medication dose calculators",
+      "secondaryKeywords": [
+        "medication calculator",
+        "nursing dose calculations",
+        "mg to mL calculator",
+        "tablet dosage calculator",
+        "IV drip rate calculator"
+      ],
+      "synonyms": [],
+      "metaDescription": "Free medication dose calculators for nurses and clinicians: mg to mL, tablet dosage, IV drip rates, dilutions, BSA, IBW, and Cockcroft-Gault CrCl.",
+      "schema": [
+        "WebPage"
+      ],
+      "recommendedH1": "Medication dose calculators for nursing maths"
+    },
+    {
+      "url": "https://www.medmaths.com/calculators",
+      "type": "main",
+      "canonical": "https://www.medmaths.com/calculators",
+      "robots": "index,follow",
+      "categoryKey": null,
+      "displayName": "MedMaths",
+      "title": "Medication Maths Calculators | Dose, IV & Tablet Tools",
+      "primaryKeyword": "medication maths calculators",
+      "secondaryKeywords": [
+        "nursing medication calculators",
+        "dose calculation calculators",
+        "IV drip rate calculator",
+        "tablet dosage calculator"
+      ],
+      "synonyms": [],
+      "metaDescription": "Browse focused medication maths calculators for mg to mL, mg/kg dosing, tablets, IV drip rates, infusion time, dilutions, BSA, IBW, and CrCl.",
+      "schema": [
+        "WebPage"
+      ],
+      "recommendedH1": "Medication maths calculators"
+    },
+    {
+      "url": "https://www.medmaths.com/about",
+      "type": "main",
+      "canonical": "https://www.medmaths.com/about",
+      "robots": "index,follow",
+      "categoryKey": null,
+      "displayName": "MedMaths",
+      "title": "About MedMaths | Medication Maths Built by an RN",
+      "primaryKeyword": "medication calculation website",
+      "secondaryKeywords": [],
+      "synonyms": [],
+      "metaDescription": "Learn about MedMaths, a focused medication maths calculator library built around dose conversions, tablet dosing, IV rates, dilutions, and renal dosing checks.",
+      "schema": [
+        "WebPage"
+      ],
+      "recommendedH1": "About MedMaths"
+    },
+    {
+      "url": "https://www.medmaths.com/contact",
+      "type": "main",
+      "canonical": "https://www.medmaths.com/contact",
+      "robots": "index,follow",
+      "categoryKey": null,
+      "displayName": "MedMaths",
+      "title": "Contact MedMaths | Calculator Feedback & Corrections",
+      "primaryKeyword": "MedMaths contact",
+      "secondaryKeywords": [],
+      "synonyms": [],
+      "metaDescription": "Contact MedMaths to suggest a calculator, report a formula issue, or request a correction to medication maths content.",
+      "schema": [
+        "WebPage"
+      ],
+      "recommendedH1": "Contact"
+    },
+    {
+      "url": "https://www.medmaths.com/privacy",
+      "type": "main",
+      "canonical": "https://www.medmaths.com/privacy",
+      "robots": "index,follow",
+      "categoryKey": null,
+      "displayName": "MedMaths",
+      "title": "Privacy Policy | MedMaths",
+      "primaryKeyword": "MedMaths privacy policy",
+      "secondaryKeywords": [],
+      "synonyms": [],
+      "metaDescription": "Read how MedMaths handles privacy, analytics, cookies, advertising, and calculator input privacy.",
+      "schema": [
+        "WebPage"
+      ],
+      "recommendedH1": "Privacy Policy"
+    },
+    {
+      "url": "https://www.medmaths.com/cookies",
+      "type": "main",
+      "canonical": "https://www.medmaths.com/cookies",
+      "robots": "index,follow",
+      "categoryKey": null,
+      "displayName": "MedMaths",
+      "title": "Cookie Policy | MedMaths",
+      "primaryKeyword": "MedMaths cookie policy",
+      "secondaryKeywords": [],
+      "synonyms": [],
+      "metaDescription": "Cookie policy for MedMaths, including analytics and advertising cookies and how to manage browser cookie settings.",
+      "schema": [
+        "WebPage"
+      ],
+      "recommendedH1": "Cookie Policy"
+    },
+    {
+      "url": "https://www.medmaths.com/terms",
+      "type": "main",
+      "canonical": "https://www.medmaths.com/terms",
+      "robots": "index,follow",
+      "categoryKey": null,
+      "displayName": "MedMaths",
+      "title": "Terms of Use | MedMaths",
+      "primaryKeyword": "MedMaths terms of use",
+      "secondaryKeywords": [],
+      "synonyms": [],
+      "metaDescription": "Terms of use for MedMaths medication calculators, including educational use, limitations, and user responsibilities.",
+      "schema": [
+        "WebPage"
+      ],
+      "recommendedH1": "Terms of Use"
+    },
+    {
+      "url": "https://www.medmaths.com/disclaimer",
+      "type": "main",
+      "canonical": "https://www.medmaths.com/disclaimer",
+      "robots": "index,follow",
+      "categoryKey": null,
+      "displayName": "MedMaths",
+      "title": "Medical Disclaimer | MedMaths Calculators",
+      "primaryKeyword": "MedMaths medical disclaimer",
+      "secondaryKeywords": [],
+      "synonyms": [],
+      "metaDescription": "Medical disclaimer for MedMaths medication maths calculators. Use for education and arithmetic support only, not as a substitute for clinical judgement.",
+      "schema": [
+        "WebPage"
+      ],
+      "recommendedH1": "Medical Disclaimer"
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/body-composition",
+      "type": "category",
+      "canonical": "https://www.medmaths.com/calculator/body-composition",
+      "robots": "index,follow",
+      "categoryKey": "body-composition",
+      "displayName": "Dosing Body Measure Calculators",
+      "title": "Dosing Weight Calculators | BSA & Ideal Body Weight",
+      "primaryKeyword": "dosing body measure calculators",
+      "secondaryKeywords": [
+        "BSA calculator",
+        "ideal body weight calculator",
+        "IBW calculator",
+        "body surface area calculator"
+      ],
+      "synonyms": [
+        "body surface area",
+        "ideal body weight",
+        "IBW",
+        "BSA"
+      ],
+      "metaDescription": "Dosing body measure calculators for body surface area (BSA) and ideal body weight (IBW) used in medication dosing context.",
+      "schema": [
+        "CollectionPage",
+        "BreadcrumbList"
+      ],
+      "recommendedH1": "Dosing Body Measure Calculators"
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/dilutions",
+      "type": "category",
+      "canonical": "https://www.medmaths.com/calculator/dilutions",
+      "robots": "index,follow",
+      "categoryKey": "dilutions",
+      "displayName": "Dilution & Reconstitution Calculators",
+      "title": "Dilution Calculators | C1V1, Vial & Reconstitution",
+      "primaryKeyword": "dilution calculator",
+      "secondaryKeywords": [
+        "C1V1 C2V2 calculator",
+        "reconstitution calculator",
+        "vial dose to mL calculator",
+        "dilution formula calculator"
+      ],
+      "synonyms": [],
+      "metaDescription": "Medication dilution calculators for C1V1=C2V2, vial dose to mL, and reconstitution to final IV bag concentration.",
+      "schema": [
+        "CollectionPage",
+        "BreadcrumbList"
+      ],
+      "recommendedH1": "Dilution and Reconstitution Calculators"
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/dose-calculations",
+      "type": "category",
+      "canonical": "https://www.medmaths.com/calculator/dose-calculations",
+      "robots": "index,follow",
+      "categoryKey": "dose-calculations",
+      "displayName": "Dose Calculations",
+      "title": "Dose Calculation Calculators | mg to mL & mg/kg",
+      "primaryKeyword": "dose calculation calculators",
+      "secondaryKeywords": [
+        "mg to mL calculator",
+        "mg/kg to mL calculator",
+        "units to mL calculator",
+        "dose to volume calculator"
+      ],
+      "synonyms": [],
+      "metaDescription": "Dose calculation calculators for medicine volume, mg to mL, mg/kg to mL, and units to mL conversions with formulas and worked examples.",
+      "schema": [
+        "CollectionPage",
+        "BreadcrumbList"
+      ],
+      "recommendedH1": "Dose Calculation Calculators"
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/iv-fluids",
+      "type": "category",
+      "canonical": "https://www.medmaths.com/calculator/iv-fluids",
+      "robots": "index,follow",
+      "categoryKey": "iv-fluids",
+      "displayName": "IV Fluids & Infusion Calculators",
+      "title": "IV Drip Rate Calculators | mL/hr & gtt/min",
+      "primaryKeyword": "IV drip rate calculator",
+      "secondaryKeywords": [
+        "IV drip rate calculator",
+        "drops per minute calculator",
+        "gtt/min calculator",
+        "mL/hr calculator",
+        "infusion time calculator"
+      ],
+      "synonyms": [],
+      "metaDescription": "IV drip rate calculators for mL/hr to gtt/min, drops per minute to mL/hr, and infusion time using volume, time, rate, and drop factor.",
+      "schema": [
+        "CollectionPage",
+        "BreadcrumbList"
+      ],
+      "recommendedH1": "IV Drip Rate and Infusion Calculators"
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/renal-function",
+      "type": "category",
+      "canonical": "https://www.medmaths.com/calculator/renal-function",
+      "robots": "index,follow",
+      "categoryKey": "renal-function",
+      "displayName": "Renal Dosing Support",
+      "title": "Renal Dosing Calculator | Cockcroft-Gault CrCl",
+      "primaryKeyword": "creatinine clearance calculator",
+      "secondaryKeywords": [
+        "creatinine clearance calculator",
+        "Cockcroft-Gault calculator",
+        "CrCl calculator",
+        "renal dosing calculator"
+      ],
+      "synonyms": [],
+      "metaDescription": "Cockcroft-Gault creatinine clearance calculator for renal dosing checks, with µmol/L and mg/dL serum creatinine support.",
+      "schema": [
+        "CollectionPage",
+        "BreadcrumbList"
+      ],
+      "recommendedH1": "Renal Dosing Support"
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/tablet-dosing",
+      "type": "category",
+      "canonical": "https://www.medmaths.com/calculator/tablet-dosing",
+      "robots": "index,follow",
+      "categoryKey": "tablet-dosing",
+      "displayName": "Tablet & Oral Dosing Calculators",
+      "title": "Tablet Dosage Calculators | Dose to Tablets",
+      "primaryKeyword": "tablet dosage calculator",
+      "secondaryKeywords": [
+        "tablet dosage calculator",
+        "mg to tablets calculator",
+        "dose divided by strength formula",
+        "tablet dosing calculator"
+      ],
+      "synonyms": [],
+      "metaDescription": "Tablet dosage calculators for ordered dose divided by tablet strength, including mg to tablets and weight-based mg/kg tablet dosing.",
+      "schema": [
+        "CollectionPage",
+        "BreadcrumbList"
+      ],
+      "recommendedH1": "Tablet Dosage Calculators"
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/body-composition/bsa",
+      "type": "calculator",
+      "canonical": "https://www.medmaths.com/calculator/body-composition/bsa",
+      "robots": "index,follow",
+      "categoryKey": "body-composition",
+      "displayName": "BSA Calculator (Body Surface Area)",
+      "title": "BSA Calculator | Body Surface Area for Dosing",
+      "primaryKeyword": "BSA calculator",
+      "secondaryKeywords": [
+        "body surface area calculator",
+        "BSA m2 calculator",
+        "Mosteller BSA calculator",
+        "Du Bois BSA calculator",
+        "BSA for chemotherapy dosing"
+      ],
+      "synonyms": [
+        "bsa",
+        "body surface area",
+        "m2",
+        "m²",
+        "mosteller",
+        "dubois"
+      ],
+      "metaDescription": "Calculate body surface area in m² for medication dosing using Mosteller, Du Bois, Haycock, and Gehan & George formulas.",
+      "schema": [
+        "WebApplication",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "recommendedH1": "BSA Calculator for Medication Dosing",
+      "lastReviewed": "2026-06-21",
+      "audience": [
+        "nurses",
+        "student nurses",
+        "pharmacists",
+        "clinicians"
+      ],
+      "siteAngle": "Formula-first medication maths calculator with examples and safety scope."
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/body-composition/ideal-body-weight",
+      "type": "calculator",
+      "canonical": "https://www.medmaths.com/calculator/body-composition/ideal-body-weight",
+      "robots": "index,follow",
+      "categoryKey": "body-composition",
+      "displayName": "Ideal Body Weight (IBW) Calculator",
+      "title": "Ideal Body Weight Calculator | Devine Formula",
+      "primaryKeyword": "ideal body weight calculator",
+      "secondaryKeywords": [
+        "IBW calculator",
+        "Devine formula calculator",
+        "ideal body weight for dosing",
+        "IBW kg",
+        "predicted body weight calculator"
+      ],
+      "synonyms": [
+        "ibw",
+        "ideal body weight",
+        "devine",
+        "predicted body weight"
+      ],
+      "metaDescription": "Calculate ideal body weight in kg using the Devine formula for medication dosing, ventilation reference weight, and clinical checking.",
+      "schema": [
+        "WebApplication",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "recommendedH1": "Ideal Body Weight (IBW) Calculator",
+      "lastReviewed": "2026-06-21",
+      "audience": [
+        "nurses",
+        "student nurses",
+        "pharmacists",
+        "clinicians"
+      ],
+      "siteAngle": "Formula-first medication maths calculator with examples and safety scope."
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/dilutions/c1v1-c2v2-basic",
+      "type": "calculator",
+      "canonical": "https://www.medmaths.com/calculator/dilutions/c1v1-c2v2-basic",
+      "robots": "index,follow",
+      "categoryKey": "dilutions",
+      "displayName": "C1V1 = C2V2 Dilution Calculator",
+      "title": "C1V1=C2V2 Calculator | Dilution Formula Solver",
+      "primaryKeyword": "C1V1 C2V2 calculator",
+      "secondaryKeywords": [
+        "dilution calculator",
+        "C1V1 C2V2 formula",
+        "concentration volume calculator",
+        "stock dilution calculator"
+      ],
+      "synonyms": [
+        "c1v1",
+        "c2v2",
+        "dilution equation",
+        "stock concentration",
+        "final concentration"
+      ],
+      "metaDescription": "Solve C1V1=C2V2 dilution formula problems for concentration or volume. Includes final volume, stock volume, formula, and examples.",
+      "schema": [
+        "WebApplication",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "recommendedH1": "C1V1 = C2V2 Dilution Calculator",
+      "lastReviewed": "2026-06-21",
+      "audience": [
+        "nurses",
+        "student nurses",
+        "pharmacists",
+        "clinicians"
+      ],
+      "siteAngle": "Formula-first medication maths calculator with examples and safety scope."
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/dilutions/reconstitute-to-bag",
+      "type": "calculator",
+      "canonical": "https://www.medmaths.com/calculator/dilutions/reconstitute-to-bag",
+      "robots": "index,follow",
+      "categoryKey": "dilutions",
+      "displayName": "Reconstitute Vial → Bag Calculator",
+      "title": "Reconstitution Calculator | Vial to IV Bag",
+      "primaryKeyword": "reconstitution calculator",
+      "secondaryKeywords": [
+        "vial to bag calculator",
+        "reconstitute vial calculator",
+        "final bag concentration calculator",
+        "IV bag dilution calculator"
+      ],
+      "synonyms": [
+        "reconstitute",
+        "vial to bag",
+        "iv bag",
+        "final concentration"
+      ],
+      "metaDescription": "Calculate final IV bag concentration after reconstituting a vial and transferring a dose volume. Includes vial concentration and bag dilution steps.",
+      "schema": [
+        "WebApplication",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "recommendedH1": "Reconstitute Vial → Bag Calculator",
+      "lastReviewed": "2026-06-21",
+      "audience": [
+        "nurses",
+        "student nurses",
+        "pharmacists",
+        "clinicians"
+      ],
+      "siteAngle": "Formula-first medication maths calculator with examples and safety scope."
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/dilutions/vial-dose-to-ml",
+      "type": "calculator",
+      "canonical": "https://www.medmaths.com/calculator/dilutions/vial-dose-to-ml",
+      "robots": "index,follow",
+      "categoryKey": "dilutions",
+      "displayName": "Vial Dose → mL Calculator",
+      "title": "Vial Dose to mL Calculator | Draw-Up Volume",
+      "primaryKeyword": "vial dose to mL calculator",
+      "secondaryKeywords": [
+        "dose to volume calculator",
+        "vial concentration calculator",
+        "draw up volume calculator",
+        "mg to mL vial dose"
+      ],
+      "synonyms": [
+        "dose to ml",
+        "dose to mL",
+        "vial dose",
+        "draw up volume",
+        "volume"
+      ],
+      "metaDescription": "Convert an ordered vial dose in mg to draw-up volume in mL using vial concentration. Shows dose ÷ concentration formula and examples.",
+      "schema": [
+        "WebApplication",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "recommendedH1": "Vial Dose to mL Calculator",
+      "lastReviewed": "2026-06-21",
+      "audience": [
+        "nurses",
+        "student nurses",
+        "pharmacists",
+        "clinicians"
+      ],
+      "siteAngle": "Formula-first medication maths calculator with examples and safety scope."
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/dose-calculations/mg-to-ml",
+      "type": "calculator",
+      "canonical": "https://www.medmaths.com/calculator/dose-calculations/mg-to-ml",
+      "robots": "index,follow",
+      "categoryKey": "dose-calculations",
+      "displayName": "mg → mL Calculator (mg/mL)",
+      "title": "mg to mL Calculator for Medicine | Dose & Syringe",
+      "primaryKeyword": "mg to mL calculator",
+      "secondaryKeywords": [
+        "mg to ml drug conversion",
+        "mg to ml medicine",
+        "mg to ml syringe",
+        "mg per 5 ml calculator",
+        "dose to volume calculator",
+        "mg/mL calculator",
+        "2.5 mg to ml"
+      ],
+      "synonyms": [
+        "mg to ml",
+        "mg to mL",
+        "mg/ml",
+        "mg/mL",
+        "dose volume",
+        "syringe volume",
+        "medicine concentration"
+      ],
+      "metaDescription": "Convert mg to mL from a medicine label using mg/mL or mg per 5 mL. Shows the formula, syringe-volume examples, and why concentration matters.",
+      "schema": [
+        "WebApplication",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "recommendedH1": "mg to mL Calculator for Medicine",
+      "lastReviewed": "2026-06-21",
+      "audience": [
+        "nurses",
+        "student nurses",
+        "pharmacists",
+        "clinicians"
+      ],
+      "siteAngle": "Formula-first medication maths calculator with examples and safety scope."
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/dose-calculations/mgkg-to-ml-dose",
+      "type": "calculator",
+      "canonical": "https://www.medmaths.com/calculator/dose-calculations/mgkg-to-ml-dose",
+      "robots": "index,follow",
+      "categoryKey": "dose-calculations",
+      "displayName": "mg/kg → mL per Dose Calculator",
+      "title": "mg/kg to mL Calculator | Weight-Based Liquid Dose",
+      "primaryKeyword": "mg/kg to mL calculator",
+      "secondaryKeywords": [
+        "mg per kg to ml calculator",
+        "weight based dose calculator",
+        "paediatric dose calculator",
+        "liquid medicine dose calculator",
+        "mg/kg dose volume"
+      ],
+      "synonyms": [
+        "mg/kg",
+        "mg per kg",
+        "weight based",
+        "dose volume",
+        "liquid dose"
+      ],
+      "metaDescription": "Convert a mg/kg medicine order into total mg and mL using patient weight and medication concentration. Includes formula and worked examples.",
+      "schema": [
+        "WebApplication",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "recommendedH1": "mg/kg → mL per Dose Calculator",
+      "lastReviewed": "2026-06-21",
+      "audience": [
+        "nurses",
+        "student nurses",
+        "pharmacists",
+        "clinicians"
+      ],
+      "siteAngle": "Formula-first medication maths calculator with examples and safety scope."
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/dose-calculations/units-to-ml",
+      "type": "calculator",
+      "canonical": "https://www.medmaths.com/calculator/dose-calculations/units-to-ml",
+      "robots": "index,follow",
+      "categoryKey": "dose-calculations",
+      "displayName": "Units → mL Calculator",
+      "title": "Units to mL Calculator | Unit Dose Volume",
+      "primaryKeyword": "units to mL calculator",
+      "secondaryKeywords": [
+        "convert units to mL",
+        "units per mL calculator",
+        "insulin units to mL",
+        "heparin units to mL",
+        "unit dose volume"
+      ],
+      "synonyms": [
+        "units to ml",
+        "units to mL",
+        "units/mL",
+        "units per mL",
+        "unit dose"
+      ],
+      "metaDescription": "Convert unit-based medicine doses to mL using units/mL concentration. Useful for checking insulin, heparin, and other unit-dose labels.",
+      "schema": [
+        "WebApplication",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "recommendedH1": "Units → mL Calculator",
+      "lastReviewed": "2026-06-21",
+      "audience": [
+        "nurses",
+        "student nurses",
+        "pharmacists",
+        "clinicians"
+      ],
+      "siteAngle": "Formula-first medication maths calculator with examples and safety scope."
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/iv-fluids/drip-rate-mlhr-to-gttmin",
+      "type": "calculator",
+      "canonical": "https://www.medmaths.com/calculator/iv-fluids/drip-rate-mlhr-to-gttmin",
+      "robots": "index,follow",
+      "categoryKey": "iv-fluids",
+      "displayName": "mL/hr → gtt/min Drip Rate Calculator",
+      "title": "IV Drip Rate Calculator | mL/hr to gtt/min",
+      "primaryKeyword": "IV drip rate calculator",
+      "secondaryKeywords": [
+        "mL/hr to gtt/min",
+        "mL/hr to drops per minute",
+        "gtt/min calculator",
+        "drop factor calculator",
+        "IV flow rate calculator"
+      ],
+      "synonyms": [
+        "gtt/min",
+        "drops per minute",
+        "drip factor",
+        "drop factor",
+        "microdrip",
+        "macrodrip"
+      ],
+      "metaDescription": "Convert IV pump rate in mL/hr to drops per minute using tubing drop factor. Includes gtt/min formula, rounding, and nursing examples.",
+      "schema": [
+        "WebApplication",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "recommendedH1": "IV Drip Rate Calculator",
+      "lastReviewed": "2026-06-21",
+      "audience": [
+        "nurses",
+        "student nurses",
+        "pharmacists",
+        "clinicians"
+      ],
+      "siteAngle": "Formula-first medication maths calculator with examples and safety scope."
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/iv-fluids/ml-per-hour-to-time-to-finish",
+      "type": "calculator",
+      "canonical": "https://www.medmaths.com/calculator/iv-fluids/ml-per-hour-to-time-to-finish",
+      "robots": "index,follow",
+      "categoryKey": "iv-fluids",
+      "displayName": "Time to Finish from mL/hr Calculator",
+      "title": "Infusion Time Calculator | mL/hr & Volume",
+      "primaryKeyword": "infusion time calculator",
+      "secondaryKeywords": [
+        "mL/hr to time calculator",
+        "time to finish infusion",
+        "IV bag time calculator",
+        "how long will IV infusion take"
+      ],
+      "synonyms": [
+        "time to finish",
+        "infusion time",
+        "ml/hr",
+        "mL/hr",
+        "volume remaining"
+      ],
+      "metaDescription": "Calculate how long an IV infusion will take from volume remaining and mL/hr rate. Shows hours, minutes, formula, and examples.",
+      "schema": [
+        "WebApplication",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "recommendedH1": "Infusion Time Calculator",
+      "lastReviewed": "2026-06-21",
+      "audience": [
+        "nurses",
+        "student nurses",
+        "pharmacists",
+        "clinicians"
+      ],
+      "siteAngle": "Formula-first medication maths calculator with examples and safety scope."
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/iv-fluids/mlhr-from-drip-rate",
+      "type": "calculator",
+      "canonical": "https://www.medmaths.com/calculator/iv-fluids/mlhr-from-drip-rate",
+      "robots": "index,follow",
+      "categoryKey": "iv-fluids",
+      "displayName": "mL/hr from Drip Rate Calculator",
+      "title": "Drops/min to mL/hr Calculator | IV Drip Rate",
+      "primaryKeyword": "drops per minute to mL/hr calculator",
+      "secondaryKeywords": [
+        "gtt/min to mL/hr",
+        "drops per minute to ml per hour",
+        "IV drip converter",
+        "drip rate to infusion rate"
+      ],
+      "synonyms": [
+        "gtt/min",
+        "drops per minute",
+        "ml/hr",
+        "mL/hr",
+        "drop factor"
+      ],
+      "metaDescription": "Convert counted drops per minute to mL/hr using IV tubing drop factor. Supports gravity IV checks with formula and worked examples.",
+      "schema": [
+        "WebApplication",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "recommendedH1": "Drops/min to mL/hr Calculator",
+      "lastReviewed": "2026-06-21",
+      "audience": [
+        "nurses",
+        "student nurses",
+        "pharmacists",
+        "clinicians"
+      ],
+      "siteAngle": "Formula-first medication maths calculator with examples and safety scope."
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/renal-function/creatinine-clearance",
+      "type": "calculator",
+      "canonical": "https://www.medmaths.com/calculator/renal-function/creatinine-clearance",
+      "robots": "index,follow",
+      "categoryKey": "renal-function",
+      "displayName": "Creatinine Clearance Calculator (Cockcroft–Gault)",
+      "title": "Creatinine Clearance Calculator | Cockcroft-Gault",
+      "primaryKeyword": "creatinine clearance calculator",
+      "secondaryKeywords": [
+        "Cockcroft-Gault calculator",
+        "CrCl calculator",
+        "creatinine clearance µmol/L",
+        "creatinine clearance mg/dL",
+        "renal dosing calculator"
+      ],
+      "synonyms": [
+        "crcl",
+        "cockcroft gault",
+        "creatinine clearance",
+        "ml/min",
+        "µmol/L",
+        "umol/L",
+        "mg/dL",
+        "renal dosing"
+      ],
+      "metaDescription": "Estimate Cockcroft-Gault creatinine clearance for medication dosing using age, weight, sex, and serum creatinine in µmol/L or mg/dL.",
+      "schema": [
+        "WebApplication",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "recommendedH1": "Creatinine Clearance Calculator",
+      "lastReviewed": "2026-06-21",
+      "audience": [
+        "nurses",
+        "student nurses",
+        "pharmacists",
+        "clinicians"
+      ],
+      "siteAngle": "Formula-first medication maths calculator with examples and safety scope."
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/tablet-dosing/mg-to-tablets",
+      "type": "calculator",
+      "canonical": "https://www.medmaths.com/calculator/tablet-dosing/mg-to-tablets",
+      "robots": "index,follow",
+      "categoryKey": "tablet-dosing",
+      "displayName": "mg → Tablets Calculator",
+      "title": "Tablet Dosage Calculator | Dose ÷ Strength Formula",
+      "primaryKeyword": "tablet dosage calculator",
+      "secondaryKeywords": [
+        "tablet dosing calculator",
+        "mg to tablets calculator",
+        "how many tablets calculator",
+        "dose divided by strength",
+        "D/H formula tablets"
+      ],
+      "synonyms": [
+        "mg to tablets",
+        "tablets per dose",
+        "dose strength formula",
+        "tablet dose"
+      ],
+      "metaDescription": "Calculate how many tablets to give from ordered dose and tablet strength. Shows dose ÷ strength formula, examples, and tablet-splitting checks.",
+      "schema": [
+        "WebApplication",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "recommendedH1": "Tablet Dosage Calculator",
+      "lastReviewed": "2026-06-21",
+      "audience": [
+        "nurses",
+        "student nurses",
+        "pharmacists",
+        "clinicians"
+      ],
+      "siteAngle": "Formula-first medication maths calculator with examples and safety scope."
+    },
+    {
+      "url": "https://www.medmaths.com/calculator/tablet-dosing/mgkg-to-tablets",
+      "type": "calculator",
+      "canonical": "https://www.medmaths.com/calculator/tablet-dosing/mgkg-to-tablets",
+      "robots": "index,follow",
+      "categoryKey": "tablet-dosing",
+      "displayName": "mg/kg → Tablets Calculator",
+      "title": "mg/kg to Tablets Calculator | Weight-Based Dose",
+      "primaryKeyword": "mg/kg to tablets calculator",
+      "secondaryKeywords": [
+        "weight based tablet dose calculator",
+        "mg/kg dose to tablets",
+        "paediatric tablet dose calculator",
+        "tablet dose by weight"
+      ],
+      "synonyms": [
+        "mg/kg",
+        "tablets",
+        "weight based",
+        "tablet strength"
+      ],
+      "metaDescription": "Convert a mg/kg medicine order into total mg and tablets using patient weight and tablet strength. Includes formula, examples, and rounding cautions.",
+      "schema": [
+        "WebApplication",
+        "BreadcrumbList",
+        "FAQPage"
+      ],
+      "recommendedH1": "mg/kg → Tablets Calculator",
+      "lastReviewed": "2026-06-21",
+      "audience": [
+        "nurses",
+        "student nurses",
+        "pharmacists",
+        "clinicians"
+      ],
+      "siteAngle": "Formula-first medication maths calculator with examples and safety scope."
+    },
+    {
+      "url": "https://www.medmaths.com/editorial-policy",
+      "type": "main",
+      "canonical": "https://www.medmaths.com/editorial-policy",
+      "robots": "index,follow",
+      "categoryKey": null,
+      "displayName": "Editorial Policy",
+      "title": "Editorial Policy | MedMaths Formula Review Process",
+      "primaryKeyword": "MedMaths editorial policy",
+      "secondaryKeywords": [
+        "medical calculator editorial policy",
+        "calculator references",
+        "clinical calculator review process"
+      ],
+      "synonyms": [],
+      "metaDescription": "How MedMaths selects formulas, writes calculator content, checks references, handles updates, and responds to correction requests.",
+      "schema": [
+        "WebPage"
+      ],
+      "recommendedH1": "Editorial Policy"
+    }
+  ]
+}
