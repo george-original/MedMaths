@@ -1,0 +1,9 @@
+MedMaths v6 clean full project.
+
+For GitHub/Vercel:
+1. Extract this ZIP first.
+2. Upload/copy the extracted contents into the repository root.
+3. The repository root should contain app/, components/, lib/, public/, package.json, next.config.mjs, etc.
+4. Do not upload this ZIP file as a single file into the repo.
+
+This package includes components/site-footer.tsx and the updated lib/seo-utils.ts exports required by calculator-search.tsx.
