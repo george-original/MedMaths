@@ -559,9 +559,6 @@ export default function MgKgToMlDoseClient() {
 
           <VolumeMeasurementGuide
             volumeMl={result.volumePerDoseMl}
-            theme="dose"
-            title="Measurement check"
-            description="Compare the calculated volume with the markings on the prescribed administration device. This guide does not select a syringe or approve rounding."
           />
         </div>
       )}
