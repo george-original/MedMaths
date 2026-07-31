@@ -1,0 +1,74 @@
+{
+  "/calculator/dose-calculations/mg-to-ml": [
+    "/calculator/dose-calculations/mgkg-to-ml-dose",
+    "/calculator/dose-calculations/units-to-ml",
+    "/calculator/tablet-dosing#fixed-dose",
+    "/calculator/dilutions/reconstitute-to-bag"
+  ],
+  "/calculator/dose-calculations/mgkg-to-ml-dose": [
+    "/calculator/dose-calculations/mg-to-ml",
+    "/calculator/tablet-dosing#weight-based",
+    "/calculator/body-composition/ideal-body-weight",
+    "/calculator/body-composition/bsa"
+  ],
+  "/calculator/dose-calculations/units-to-ml": [
+    "/calculator/dose-calculations/mg-to-ml",
+    "/calculator/dose-calculations/mgkg-to-ml-dose",
+    "/calculator/dilutions/c1v1-c2v2-basic",
+    "/calculator/tablet-dosing#fixed-dose"
+  ],
+  "/calculator/tablet-dosing": [
+    "/calculator/dose-calculations/mg-to-ml",
+    "/calculator/dose-calculations/mgkg-to-ml-dose",
+    "/calculator/body-composition/ideal-body-weight",
+    "/calculator/body-composition/bsa"
+  ],
+  "/calculator/iv-fluids/drip-rate-mlhr-to-gttmin": [
+    "/calculator/iv-fluids/mlhr-from-drip-rate",
+    "/calculator/iv-fluids/ml-per-hour-to-time-to-finish",
+    "/calculator/dilutions/reconstitute-to-bag",
+    "/calculator/dose-calculations/mg-to-ml"
+  ],
+  "/calculator/iv-fluids/mlhr-from-drip-rate": [
+    "/calculator/iv-fluids/drip-rate-mlhr-to-gttmin",
+    "/calculator/iv-fluids/ml-per-hour-to-time-to-finish",
+    "/calculator/dilutions/reconstitute-to-bag",
+    "/calculator/dose-calculations/mg-to-ml"
+  ],
+  "/calculator/iv-fluids/ml-per-hour-to-time-to-finish": [
+    "/calculator/iv-fluids/drip-rate-mlhr-to-gttmin",
+    "/calculator/iv-fluids/mlhr-from-drip-rate",
+    "/calculator/dilutions/reconstitute-to-bag",
+    "/calculator/dose-calculations/mg-to-ml"
+  ],
+  "/calculator/dilutions/c1v1-c2v2-basic": [
+    "/calculator/dilutions/reconstitute-to-bag",
+    "/calculator/dose-calculations/mg-to-ml",
+    "/calculator/dose-calculations/units-to-ml",
+    "/calculator/iv-fluids/ml-per-hour-to-time-to-finish"
+  ],
+  "/calculator/dilutions/reconstitute-to-bag": [
+    "/calculator/dilutions/c1v1-c2v2-basic",
+    "/calculator/dose-calculations/mg-to-ml",
+    "/calculator/iv-fluids/ml-per-hour-to-time-to-finish",
+    "/calculator/iv-fluids/drip-rate-mlhr-to-gttmin"
+  ],
+  "/calculator/body-composition/bsa": [
+    "/calculator/body-composition/ideal-body-weight",
+    "/calculator/renal-function/creatinine-clearance",
+    "/calculator/dose-calculations/mgkg-to-ml-dose",
+    "/calculator/dilutions/c1v1-c2v2-basic"
+  ],
+  "/calculator/body-composition/ideal-body-weight": [
+    "/calculator/renal-function/creatinine-clearance",
+    "/calculator/body-composition/bsa",
+    "/calculator/dose-calculations/mgkg-to-ml-dose",
+    "/calculator/tablet-dosing#weight-based"
+  ],
+  "/calculator/renal-function/creatinine-clearance": [
+    "/calculator/body-composition/ideal-body-weight",
+    "/calculator/body-composition/bsa",
+    "/calculator/dose-calculations/mgkg-to-ml-dose",
+    "/calculator/tablet-dosing#fixed-dose"
+  ]
+}

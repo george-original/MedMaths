@@ -4,18 +4,39 @@ import Link from "next/link"
 
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { FAQAccordion } from "@/components/faq-accordion"
+import { RelatedCalculators } from "@/components/related-calculators"
+import { getCalculatorNetworkItems } from "@/lib/calculator-network"
+import { CalculatorEquation, CalculatorTrustBlock } from "@/components/calculator"
+
+import {
+  buildDevineWorking,
+  calculateDevineValue,
+  devineFormulaDefinitions,
+  formatDevineNumber,
+} from "@/lib/ideal-body-weight-formulas"
 
 import IdealBodyWeightClient from "./ideal-body-weight-client"
 
 const CANONICAL = "https://www.medmaths.com/calculator/body-composition/ideal-body-weight"
-const UPDATED_DATE_ISO = "2026-06-21"
-const UPDATED_DATE_HUMAN = "21 Jun 2026"
+const UPDATED_DATE_ISO = "2026-07-30"
+const UPDATED_DATE_HUMAN = "30 Jul 2026"
 
 export const metadata: Metadata = {
-  title: "Ideal Body Weight Calculator | Devine Formula",
-  description: "Calculate ideal body weight in kg using the Devine formula for medication dosing, ventilation reference weight, and clinical checking.",
-  keywords: ["ideal body weight calculator", "IBW calculator", "Devine formula calculator", "ideal body weight for dosing", "IBW kg", "predicted body weight calculator", "ibw", "ideal body weight", "devine", "predicted body weight"],
+  title: "Clinical Ideal Body Weight Calculator | Devine IBW",
+  description:
+    "Calculate adult Devine ideal body weight (IBW) from height in cm or feet and inches. Clinical reference weight only—not a healthy target or dosing decision.",
+  keywords: [
+    "clinical ideal body weight calculator",
+    "ideal body weight calculator",
+    "IBW calculator",
+    "Devine formula calculator",
+    "Devine formula in kg",
+    "male Devine formula",
+    "female Devine formula",
+    "ideal body weight formula in cm",
+    "ideal body weight for medication dosing",
+    "adult IBW calculator",
+  ],
   authors: [{ name: "George Lambroglou, RN", url: "https://www.medmaths.com/about" }],
   creator: "George Lambroglou, RN",
   publisher: "MedMaths",
@@ -32,8 +53,9 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Ideal Body Weight Calculator | Devine Formula",
-    description: "Calculate ideal body weight in kg using the Devine formula for medication dosing, ventilation reference weight, and clinical checking.",
+    title: "Clinical Ideal Body Weight Calculator | Devine IBW",
+    description:
+      "Calculate adult Devine ideal body weight (IBW) from height in cm or feet and inches. Clinical reference weight only—not a healthy target or dosing decision.",
     url: "https://www.medmaths.com/calculator/body-composition/ideal-body-weight",
     siteName: "MedMaths",
     type: "website",
@@ -41,8 +63,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "Ideal Body Weight Calculator | Devine Formula",
-    description: "Calculate ideal body weight in kg using the Devine formula for medication dosing, ventilation reference weight, and clinical checking.",
+    title: "Clinical Ideal Body Weight Calculator | Devine IBW",
+    description:
+      "Calculate adult Devine ideal body weight (IBW) from height in cm or feet and inches. Clinical reference weight only—not a healthy target or dosing decision.",
   },
 }
 
@@ -55,144 +78,144 @@ const breadcrumbs = [
 
 const faqItems = [
   {
-    question: "What is ideal body weight (IBW)?",
+    question: "What does IBW mean, and what does the result represent?",
     quickAnswer:
-      "Ideal body weight (IBW) is a height-based estimate used in some clinical calculations and dosing guidance.",
+      "IBW means ideal body weight. Here it is the adult reference weight returned by the selected Devine equation from height and sex.",
     details: [
-      "IBW is derived from a height-based equation (it is not a direct measurement of body fat or body composition).",
-      "IBW is commonly referenced in ICU contexts (e.g., predicted body weight for ventilation) and some dosing protocols.",
-      "Always follow local protocol for whether to use actual body weight, ideal body weight, or adjusted body weight.",
+      "The result is reported in kilograms.",
+      "It is not measured body weight, a healthy-weight target, or a direct body-composition measurement.",
+      "Use it only when the medication reference or clinical protocol specifically requires Devine IBW.",
     ],
-    microExample: "Two people of the same height can have the same IBW even if their actual weights differ.",
+    microExample: "A 175 cm male adult has a Devine IBW of about 70.5 kg.",
   },
   {
-    question: "Which formula does this IBW calculator use?",
+    question: "Which ideal body weight formula does this calculator use?",
     quickAnswer:
-      "This calculator uses the Devine equation: base weight + 2.3 kg for every inch over 5 feet (60 inches).",
+      "It uses the adult male and female Devine equations: a base weight at 5 feet plus 2.3 kg for each inch above 5 feet.",
     details: [
-      "Convert height from cm to inches: inches = cm ÷ 2.54.",
-      "Calculate inches over 60: (height in) − 60.",
-      "Use the male or female Devine equation.",
+      "Male: 50 + 2.3 × (height in inches − 60).",
+      "Female: 45.5 + 2.3 × (height in inches − 60).",
+      "The male and female equations differ by their 5-foot base weight.",
     ],
-    microExample: "175 cm → 68.90 in → inches over 60 = 8.90.",
+    microExample: "Male 5 ft 10 in: 50 + 2.3×10 = 73 kg.",
   },
   {
-    question: "What is the IBW formula for females?",
-    quickAnswer: "Female Devine IBW: 45.5 + 2.3 × (height in inches − 60).",
-    details: [
-      "First convert height from centimeters to inches using: inches = cm ÷ 2.54.",
-      "Then subtract 60 inches and multiply by 2.3, and add 45.5 kg.",
-      "Small differences between calculators can occur due to rounding at different steps.",
-    ],
-    microExample: "160 cm → 62.99 in → IBW = 45.5 + 2.3×2.99 = 52.4 kg.",
-  },
-  {
-    question: "Can I calculate IBW using centimeters (cm) instead of inches?",
+    question: "Can I calculate Devine IBW using centimetres or feet and inches?",
     quickAnswer:
-      "Yes—use the standard Devine method (cm → inches), or use an approximate cm-formula for quick estimates.",
+      "Yes. The calculator accepts either system and converts centimetres to inches using 1 inch = 2.54 cm before applying Devine.",
     details: [
-      "Exact method: convert cm to inches first (cm ÷ 2.54), then apply Devine.",
-      "Approximate shortcut (derived from Devine): Male ≈ 0.9055×cm − 88; Female ≈ 0.9055×cm − 92.5.",
-      "Use the exact method when your protocol requires precise rounding rules.",
+      "The measurement-system switch converts a valid entered height.",
+      "The formula is then applied using the full, unrounded height conversion.",
+      "The step-by-step working shows the conversion used.",
     ],
-    microExample: "Male 175 cm: 0.9055×175 − 88 = 70.5 kg (approx).",
+    microExample: "175 cm ÷ 2.54 = 68.8976 inches before the Devine equation is applied.",
   },
   {
-    question: "What is predicted body weight (PBW) and how is it related to IBW?",
+    question: "Why can two IBW calculators give different results?",
     quickAnswer:
-      "PBW is a height-based weight estimate used in some ventilation protocols; it is closely related to IBW but may use a different coefficient in cm-based formulas.",
+      "They may use a different equation or round height at a different stage.",
     details: [
-      "Some ARDS ventilation protocols use PBW formulas in centimeters (cm) rather than inches-based Devine.",
-      "PBW is often used to set lung-protective tidal volumes.",
-      "If your ICU protocol specifies PBW, follow that formula (and local rules for patients < 5 feet).",
+      "Devine, Robinson, Miller, and Hamwi are different equations and are not interchangeable.",
+      "Rounding centimetres-to-inches before the final step can slightly change the result.",
+      "Use the named method required by the relevant clinical reference.",
     ],
-    microExample: "PBW formulas often look like: base + 0.91×(cm − 152.4).",
+    microExample: "Rounding 68.8976 inches to 69 inches before calculating changes the displayed result slightly.",
   },
   {
-    question: "Why do different IBW calculators give slightly different results?",
-    quickAnswer: "Differences are usually due to rounding or using a different equation labeled as “IBW.”",
-    details: [
-      "Some calculators round the cm→in conversion earlier, which changes the final kg slightly.",
-      "Some tools use alternative IBW equations (e.g., Robinson, Miller, Hamwi) but still label the output as IBW.",
-      "If your workplace specifies a method, use that method consistently.",
-    ],
-    microExample: "68.9 inches vs 69 inches can change IBW by a small amount.",
-  },
-  {
-    question: "When should I use adjusted body weight (AdjBW) instead of IBW?",
+    question: "When should ideal body weight be used for medication calculations?",
     quickAnswer:
-      "Some drug protocols use adjusted body weight in obesity for selected medications—follow local guidance.",
+      "Only when the medicine information, prescription, pharmacist, or local protocol specifies ideal body weight or the Devine method.",
     details: [
-      "AdjBW accounts for partial drug distribution into adipose tissue.",
-      "Drug-specific recommendations vary between protocols.",
-      "If unsure, confirm with a pharmacist or local dosing policy.",
+      "Many medicines use actual body weight instead.",
+      "Some medicine-specific protocols use adjusted body weight.",
+      "This calculator does not select the correct body-weight measure for a medicine.",
     ],
-    microExample: "Some aminoglycoside protocols specify AdjBW rather than IBW.",
+    microExample: "Do not replace a prescribed actual-weight calculation with IBW simply because IBW is available.",
   },
   {
-    question: "Is this the same as MDCalc / ClinCalc?",
+    question: "Why does this calculator stop below 5 feet (152.4 cm)?",
     quickAnswer:
-      "This page uses the Devine IBW equation; MDCalc and ClinCalc may show the same equation but can differ in rounding or may offer alternative IBW formulas.",
+      "The Devine equations use 5 feet as their reference point, and this clinical calculator does not extrapolate them below that height.",
     details: [
-      "If you are comparing results, ensure you are using the same sex selection and the same height conversion/rounding.",
-      "Some calculators include multiple IBW equations and let you choose between them.",
-      "For clinical work, follow your local protocol’s specified method.",
+      "Some clinical tools and protocols restrict Devine IBW to people at least 60 inches tall.",
+      "Short-stature policies can differ between organisations and calculations.",
+      "Use the method explicitly specified by the applicable protocol.",
     ],
-    microExample: "Rounding inches at 1 decimal vs 2 decimals can shift IBW by ~0.1–0.3 kg.",
+    microExample: "A height of 150 cm is below this calculator's supported Devine range.",
+  },
+  {
+    question: "Is Devine IBW the same as actual, adjusted, or predicted body weight?",
+    quickAnswer:
+      "No. These are separate body-weight measures and may use different inputs and equations.",
+    details: [
+      "Actual body weight is measured on a scale.",
+      "Adjusted body weight is a separate medicine-specific calculation that uses actual weight and IBW.",
+      "Ventilation predicted body weight uses a protocol-specific PBW equation and is not calculated here.",
+    ],
+    microExample: "A Devine IBW result should not be copied into a ventilation PBW field unless the protocol explicitly says to do so.",
+  },
+  {
+    question: "Can this adult Devine calculator be used for children?",
+    quickAnswer:
+      "No. It is an adult clinical IBW calculator and is not a paediatric growth or dosing tool.",
+    details: [
+      "Children and adolescents require age- and growth-specific methods.",
+      "Do not substitute adult Devine IBW for a paediatric dosing policy.",
+      "Follow the prescription, product information, and local paediatric protocol.",
+    ],
+    microExample: "A paediatric mg/kg order normally begins with the prescribed paediatric weight method, not adult Devine IBW.",
   },
 ]
 
 const practiceQuestions = [
   {
-    q: "Practice 1: Male, height 175 cm. What is IBW (kg) using Devine (to 1 decimal)?",
+    q: "Practice 1: Male, height 175 cm. What is Devine IBW to 1 decimal place?",
     steps: [
-      "Convert height (in): 175 ÷ 2.54 = 68.90",
-      "Inches over 60: 68.90 − 60 = 8.90",
-      "IBW: 50 + 2.3 × 8.90 = 70.47",
-      "Rounded: 70.5 kg",
+      "Convert height: 175 ÷ 2.54 = 68.8976 inches",
+      "Inches above 5 feet: 68.8976 − 60 = 8.8976",
+      "IBW: 50 + 2.3 × 8.8976 = 70.4646",
+      "Displayed to 1 decimal place: 70.5 kg",
     ],
     answer: "70.5 kg",
   },
   {
-    q: "Practice 2: Female, height 160 cm. What is IBW (kg) using Devine (to 1 decimal)?",
+    q: "Practice 2: Female, height 160 cm. What is Devine IBW to 1 decimal place?",
     steps: [
-      "Convert height (in): 160 ÷ 2.54 = 62.99",
-      "Inches over 60: 62.99 − 60 = 2.99",
-      "IBW: 45.5 + 2.3 × 2.99 = 52.38",
-      "Rounded: 52.4 kg",
+      "Convert height: 160 ÷ 2.54 = 62.9921 inches",
+      "Inches above 5 feet: 62.9921 − 60 = 2.9921",
+      "IBW: 45.5 + 2.3 × 2.9921 = 52.3819",
+      "Displayed to 1 decimal place: 52.4 kg",
     ],
     answer: "52.4 kg",
   },
   {
-    q: "Practice 3: Male, height 190 cm. What is IBW (kg) using Devine (to 1 decimal)?",
+    q: "Practice 3: Male, height 5 feet 10 inches. What is Devine IBW?",
     steps: [
-      "Convert height (in): 190 ÷ 2.54 = 74.80",
-      "Inches over 60: 74.80 − 60 = 14.80",
-      "IBW: 50 + 2.3 × 14.80 = 84.04",
-      "Rounded: 84.0 kg",
+      "Total height: 5 feet 10 inches = 70 inches",
+      "Inches above 5 feet: 70 − 60 = 10",
+      "IBW: 50 + 2.3 × 10 = 73",
     ],
-    answer: "84.0 kg",
+    answer: "73 kg",
   },
-  {
-    q: "Practice 4: Female, height 182 cm. What is IBW (kg) using Devine (to 1 decimal)?",
-    steps: [
-      "Convert height (in): 182 ÷ 2.54 = 71.65",
-      "Inches over 60: 71.65 − 60 = 11.65",
-      "IBW: 45.5 + 2.3 × 11.65 = 72.30",
-      "Rounded: 72.3 kg",
-    ],
-    answer: "72.3 kg",
-  },
-  {
-    q: "Practice 5: Female, height 150 cm. What happens with Devine when height is under 60 inches?",
-    steps: [
-      "Convert height (in): 150 ÷ 2.54 = 59.06",
-      "Inches over 60: 59.06 − 60 = −0.94 (negative)",
-      "IBW: 45.5 + 2.3 × (−0.94) = 45.5 − 2.16 = 43.34",
-      "Rounded: 43.3 kg",
-    ],
-    answer: "43.3 kg",
-  },
+]
+
+const maleWorkedExample = {
+  heightCm: 175,
+  exact: calculateDevineValue(175, "male"),
+  working: buildDevineWorking(175, "male"),
+}
+
+const femaleWorkedExample = {
+  heightCm: 160,
+  exact: calculateDevineValue(160, "female"),
+  working: buildDevineWorking(160, "female"),
+}
+
+const commonExamples = [
+  { label: "Male 170 cm", working: "170 ÷ 2.54 = 66.93 in; 50 + 2.3×6.93", answer: "65.9 kg" },
+  { label: "Male 180 cm", working: "180 ÷ 2.54 = 70.87 in; 50 + 2.3×10.87", answer: "75.0 kg" },
+  { label: "Female 155 cm", working: "155 ÷ 2.54 = 61.02 in; 45.5 + 2.3×1.02", answer: "47.9 kg" },
+  { label: "Female 165 cm", working: "165 ÷ 2.54 = 64.96 in; 45.5 + 2.3×4.96", answer: "56.9 kg" },
 ]
 
 function jsonLdBreadcrumbList() {
@@ -225,9 +248,9 @@ function jsonLdWebApplication() {
   return {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    name: "IBW Calculator (Ideal Body Weight) – Devine Formula",
+    name: "Clinical Ideal Body Weight Calculator – Devine IBW",
     description:
-      "Calculate ideal body weight (IBW) in kg using the Devine formula for men and women. Includes worked examples, practice questions, FAQs, and references.",
+      "Calculate adult clinical ideal body weight in kilograms using the male or female Devine equation, with metric or imperial height entry and transparent working.",
     url: CANONICAL,
     applicationCategory: "MedicalApplication",
     operatingSystem: "All",
@@ -243,12 +266,11 @@ function jsonLdMedicalWebPage() {
   return {
     "@context": "https://schema.org",
     "@type": "MedicalWebPage",
-    name: "IBW Calculator (Ideal Body Weight) – Devine Formula",
+    name: "Clinical Ideal Body Weight Calculator – Devine IBW",
     url: CANONICAL,
     dateModified: UPDATED_DATE_ISO,
     about: [{ "@type": "MedicalEntity", name: "Ideal body weight" }],
     author: { "@type": "Person", name: "George Lambroglou", jobTitle: "Registered Nurse" },
-    reviewedBy: { "@type": "Person", name: "George Lambroglou", jobTitle: "Registered Nurse" },
   }
 }
 
@@ -280,59 +302,40 @@ type RefItem = {
 
 const referenceGroups: Array<{ heading: string; items: RefItem[] }> = [
   {
-    heading: "Primary & historical context",
+    heading: "Formula and historical context",
     items: [
       {
-        title: "Pai MP, Paloucek FP — The origin of the “ideal” body weight equations",
+        title: "Pai MP, Paloucek FP — The origin of the ideal body weight equations",
         badge: "PubMed",
         org: "Ann Pharmacother (2000)",
-        description: "Historical perspective on where common IBW equations came from and why sources differ.",
+        description: "Historical review of common ideal body weight equations and their clinical origins.",
         href: "https://pubmed.ncbi.nlm.nih.gov/10981254/",
       },
       {
-        title: "Peterson CM et al. — Universal equation for estimating ideal body weight",
+        title: "Chichester & Holmes — Ideal body weight: a commentary",
         badge: "PMC",
-        org: "Am J Clin Nutr (2016)",
-        description: "Compares multiple IBW equations (including Devine) and provides broader context.",
-        href: "https://pmc.ncbi.nlm.nih.gov/articles/PMC4841935/",
+        org: "Clin Nutr ESPEN (2021)",
+        description: "Clinical commentary summarising commonly used IBW equations, including Devine.",
+        href: "https://pmc.ncbi.nlm.nih.gov/articles/PMC8646317/",
+      },
+      {
+        title: "eviQ Body Surface Area Calculator — IBW and adjusted-weight formulas",
+        badge: "Clinical",
+        org: "Cancer Institute NSW",
+        description: "Australian clinical calculator documenting Devine IBW and a lower-height calculation limit.",
+        href: "https://www.eviq.org.au/clinical-resources/eviq-calculators/3198-body-surface-area-calculator",
       },
     ],
   },
   {
-    heading: "Clinical use (ventilation / PBW)",
+    heading: "Important scope distinction",
     items: [
       {
-        title: "ARDSNet trial — Lower tidal volume ventilation (PBW formula in methods)",
-        badge: "Journal",
-        org: "NEJM (2000)",
-        description: "Landmark ARDS ventilation strategy paper that defines PBW using height-based formulas.",
-        href: "https://www.nejm.org/doi/full/10.1056/NEJM200005043421801",
-      },
-      {
-        title: "MPOG chart — IBW / tidal volume chart (PBW formula, cm-based)",
-        badge: "PDF",
-        org: "Michigan Program on Value Enhancement",
-        description: "Quick reference chart showing PBW formulas in cm and guidance for patients < 5 feet.",
-        href: "https://mpog.org/files/quality/toolkit/ibw_tv_chart1.pdf",
-      },
-    ],
-  },
-  {
-    heading: "Bedside calculators & summaries",
-    items: [
-      {
-        title: "MDCalc — Ideal Body Weight & Adjusted Body Weight",
-        badge: "Clinical",
-        org: "MDCalc",
-        description: "Widely used bedside reference summarizing IBW/AdjBW equations and common use-cases.",
-        href: "https://www.mdcalc.com/calc/68/ideal-body-weight-adjusted-body-weight",
-      },
-      {
-        title: "ClinCalc — Ideal, Adjusted, and Nutritional Body Weight",
-        badge: "Clinical",
-        org: "ClinCalc.com",
-        description: "Clear explanation of IBW and related weight metrics (including adjusted approaches).",
-        href: "https://clincalc.com/kinetics/idealbw.aspx",
+        title: "Low-Tidal-Volume Ventilation facilitator guide",
+        badge: "Government",
+        org: "Agency for Healthcare Research and Quality",
+        description: "Explains that ventilation predicted body weight is a protocol-specific measure and is not ideal or actual body weight.",
+        href: "https://www.ahrq.gov/hai/tools/mvp/modules/technical/ltvv-intro-fac-guide.html",
       },
     ],
   },
@@ -341,7 +344,6 @@ const referenceGroups: Array<{ heading: string; items: RefItem[] }> = [
 export default function Page() {
   return (
     <>
-      {/* JSON-LD (MANDATORY) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumbList()) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdFAQPage()) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebApplication()) }} />
@@ -351,19 +353,18 @@ export default function Page() {
 
       <main className="min-h-screen bg-white">
         <div className="mx-auto max-w-3xl px-4 pb-12 pt-4 sm:px-6 sm:py-12 lg:px-8 lg:pt-10">
-          {/* Breadcrumb nav (MANDATORY) */}
           <nav aria-label="Breadcrumb" className="mb-4 hidden text-sm text-gray-600 sm:block">
             <ol className="flex flex-wrap items-center gap-2">
-              {breadcrumbs.map((b, idx) => {
-                const isLast = idx === breadcrumbs.length - 1
+              {breadcrumbs.map((breadcrumb, index) => {
+                const isLast = index === breadcrumbs.length - 1
                 return (
-                  <li key={b.href} className="flex items-center gap-2">
-                    {idx > 0 && <span className="text-gray-300">/</span>}
+                  <li key={breadcrumb.href} className="flex items-center gap-2">
+                    {index > 0 && <span className="text-gray-300">/</span>}
                     {isLast ? (
-                      <span className="font-medium text-gray-900">{b.name}</span>
+                      <span className="font-medium text-gray-900">{breadcrumb.name}</span>
                     ) : (
-                      <Link href={b.href} className="hover:text-emerald-700">
-                        {b.name}
+                      <Link href={breadcrumb.href} className="hover:text-emerald-700">
+                        {breadcrumb.name}
                       </Link>
                     )}
                   </li>
@@ -372,320 +373,237 @@ export default function Page() {
             </ol>
           </nav>
 
-          {/* H1 + subtitle (MANDATORY) */}
-          <header className="mb-8">
-            <h1 className="text-center text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              Ideal Body Weight (IBW) Calculator
-            </h1>
+          <h1 className="mb-3 text-center text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            Clinical Ideal Body Weight (IBW) Calculator
+          </h1>
 
-          {/* Calculator */}
-          <section id="calculator" className="calculator-tool mb-8 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-8">
+          <section id="calculator" className="mb-8 scroll-mt-24">
             <IdealBodyWeightClient />
           </section>
 
-            {/* Reviewed pills (MATCH ABW STYLE) */}
-            <div className="mt-4 flex flex-wrap justify-center gap-2">
-              <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-700">
-                Reviewed by George Lambroglou, RN
-              </span>
-              <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-700">
-                Last updated {UPDATED_DATE_HUMAN}
-              </span>
-            </div>
+          <section id="ibw-meaning" className="mb-8 grid gap-4 sm:grid-cols-2">
+            <article className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 sm:p-6">
+              <h2 className="text-xl font-bold text-gray-950">What this calculator returns</h2>
+              <p className="mt-2 text-sm leading-6 text-gray-700">
+                <strong>IBW means ideal body weight.</strong> This page returns the adult clinical reference weight produced by the selected male or female Devine equation from height.
+              </p>
+            </article>
+            <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+              <h2 className="text-xl font-bold text-gray-950">What it does not return</h2>
+              <p className="mt-2 text-sm leading-6 text-gray-700">
+                It does not calculate a healthy target weight, adjusted body weight, measured actual weight, or ventilation predicted body weight. Those are separate clinical or consumer calculations.
+              </p>
+            </article>
+          </section>
 
-            <p className="mt-4 text-center text-base text-gray-600 sm:text-lg">
-              Calculate IBW in kilograms using the <strong>Devine formula</strong> (male/female) with worked examples,
-              practice questions, FAQs, and references.
-            </p>
-          </header>
-
-          {/* Intent clarification (KEEP + OPTIMIZE) */}
-          <section className="mb-10 rounded-xl border border-gray-200 bg-gray-50 p-5">
-            <p className="text-sm text-gray-700">
-              <span className="font-semibold">Important:</span> This is a{" "}
-              <span className="font-semibold">clinical IBW</span> calculator (a height-based estimate used in some ICU
-              and dosing contexts). It is <span className="font-semibold">not</span> a “healthy target weight” tool and
-              does not measure body fat. Follow local protocol for which weight metric to use (Actual, IBW, or Adjusted).
+          <section className="mb-8 rounded-2xl border border-yellow-200 bg-yellow-50 p-5 sm:p-6">
+            <h2 className="text-xl font-bold text-yellow-950">Clinical interpretation</h2>
+            <p className="mt-2 text-sm leading-6 text-yellow-950">
+              A result such as 70.5 kg means only that the selected Devine equation returned 70.5 kg for the entered adult height. Use that number only when the medication reference or protocol specifically requires Devine IBW.
             </p>
           </section>
 
-          {/* Jump-to nav (MANDATORY) */}
-          <div className="mb-10 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm">
-            <Link href="#calculator" className="text-emerald-600 hover:text-emerald-700">
-              Calculator
-            </Link>
-            <Link href="#how-it-works" className="text-emerald-600 hover:text-emerald-700">
-              How it works
-            </Link>
-            <Link href="#formula" className="text-emerald-600 hover:text-emerald-700">
-              Formula
-            </Link>
-            <Link href="#examples" className="text-emerald-600 hover:text-emerald-700">
-              Examples
-            </Link>
-            <Link href="#practice" className="text-emerald-600 hover:text-emerald-700">
-              Practice questions
-            </Link>
-            <Link href="#faqs" className="text-emerald-600 hover:text-emerald-700">
-              FAQs
-            </Link>
-            <Link href="#references" className="text-emerald-600 hover:text-emerald-700">
-              References
-            </Link>
-          </div>
-
-          {/* Calculator section card (MANDATORY) */}
-          
-
-          {/* How it works (MANDATORY) */}
-          <section id="how-it-works" className="mb-12">
-            <h2 className="text-xl font-semibold text-gray-900">How to calculate IBW</h2>
-
-            <div className="mt-4 space-y-4 text-gray-700">
-              <p>
-                Ideal body weight (IBW) is a <strong>height-based estimate</strong>. In practice, it’s used when a
-                protocol asks for a standardized weight that is less influenced by adipose mass than total body weight
-                (TBW). Examples include some drug-dosing guidance and some ICU workflows.
-              </p>
-
-              <p>
-                This page uses the <strong>Devine equation</strong>. To compute it reliably:
-              </p>
-
-              <ul className="list-disc pl-6 space-y-2">
-                <li>
-                  <strong>Step 1:</strong> Convert height from <strong>cm → inches</strong> using{" "}
-                  <span className="font-mono">in = cm ÷ 2.54</span>
-                </li>
-                <li>
-                  <strong>Step 2:</strong> Compute <strong>inches over 60</strong>:{" "}
-                  <span className="font-mono">(in − 60)</span>
-                </li>
-                <li>
-                  <strong>Step 3:</strong> Apply the Devine formula for <strong>male</strong> or{" "}
-                  <strong>female</strong>.
-                </li>
-                <li>
-                  <strong>Step 4:</strong> Follow your workplace’s <strong>rounding policy</strong> (e.g., 0.1 kg or 0.5
-                  kg).
-                </li>
-              </ul>
-
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Quick note on common queries:</span> “Female IBW” uses the same
-                  structure, but the base constant changes (45.5 kg). “Predicted body weight (PBW)” in ventilation
-                  protocols is also height-based and may use a cm-based coefficient.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Formula (MANDATORY) */}
-          <section id="formula" className="mb-12">
-            <h2 className="text-xl font-semibold text-gray-900">Formula</h2>
-
-            <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-900">
-              <div>Convert: height (in) = height (cm) ÷ 2.54</div>
-              <div className="mt-2">Male: IBW (kg) = 50 + 2.3 × (height in − 60)</div>
-              <div>Female: IBW (kg) = 45.5 + 2.3 × (height in − 60)</div>
-            </div>
-
-            <div className="mt-6 rounded-xl border border-gray-200 bg-white p-5">
-              <h3 className="text-sm font-semibold text-gray-900">IBW formula in cm (quick estimate)</h3>
-              <p className="mt-2 text-sm text-gray-700">
-                Some people search for “ideal body weight formula in cm”. You can derive an approximate cm-form from
-                Devine (because <span className="font-mono">2.3 ÷ 2.54 ≈ 0.9055</span>):
-              </p>
-
-              <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-900">
-                <div>Male (approx): IBW (kg) ≈ 0.9055 × height(cm) − 88</div>
-                <div>Female (approx): IBW (kg) ≈ 0.9055 × height(cm) − 92.5</div>
-              </div>
-
-              <p className="mt-3 text-xs text-gray-600">
-                Use the cm→inches method for exact consistency with protocols. Shortcut formulas can differ slightly due
-                to rounding.
+          <section id="formula" className="mb-10">
+            <div className="mb-5">
+              <h2 className="text-2xl font-bold text-gray-900">How is ideal body weight calculated?</h2>
+              <p className="mt-2 text-sm leading-6 text-gray-700">
+                Height in centimetres is divided by 2.54 to convert it to inches. For adults at least 5 feet tall, the equation subtracts 60 inches, multiplies the inches above 5 feet by 2.3 kg, and adds the selected base weight.
               </p>
             </div>
-
-            <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-5">
-              <h3 className="text-sm font-semibold text-emerald-900">Predicted Body Weight (PBW) note (ventilation)</h3>
-              <p className="mt-2 text-sm text-emerald-900">
-                If your search is about “predicted body weight”, many ventilation protocols use a cm-based PBW formula.
-                Always follow your ICU guideline (especially for patients &lt; 5 feet).
-              </p>
-              <div className="mt-3 rounded-lg border border-emerald-200 bg-white p-4 font-mono text-sm text-gray-900">
-                <div>PBW (male): 50 + 0.91 × (height(cm) − 152.4)</div>
-                <div>PBW (female): 45.5 + 0.91 × (height(cm) − 152.4)</div>
-              </div>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <CalculatorEquation
+                id="male-devine-formula"
+                title={devineFormulaDefinitions.male.heading}
+                equation={devineFormulaDefinitions.male.equation}
+                spokenEquation={devineFormulaDefinitions.male.spokenEquation}
+                plainEnglish={devineFormulaDefinitions.male.plainEnglish}
+                variables={[
+                  { symbol: "IBW", meaning: "ideal body weight in kilograms" },
+                  { symbol: "height", meaning: "height in inches; divide centimetres by 2.54 first" },
+                  { symbol: "60", meaning: "60 inches, equal to 5 feet" },
+                ]}
+                theme="body"
+                headingLevel="h3"
+              />
+              <CalculatorEquation
+                id="female-devine-formula"
+                title={devineFormulaDefinitions.female.heading}
+                equation={devineFormulaDefinitions.female.equation}
+                spokenEquation={devineFormulaDefinitions.female.spokenEquation}
+                plainEnglish={devineFormulaDefinitions.female.plainEnglish}
+                variables={[
+                  { symbol: "IBW", meaning: "ideal body weight in kilograms" },
+                  { symbol: "height", meaning: "height in inches; divide centimetres by 2.54 first" },
+                  { symbol: "60", meaning: "60 inches, equal to 5 feet" },
+                ]}
+                theme="body"
+                headingLevel="h3"
+              />
             </div>
-          </section>
-
-          {/* Worked examples (MANDATORY) */}
-          <section id="examples" className="mb-12">
-            <h2 className="text-xl font-semibold text-gray-900">Worked examples</h2>
-
-            <div className="mt-4 space-y-6">
-              <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm border-l-4 border-emerald-500">
-                <p className="font-medium text-gray-900">Example 1 (Male): Height 175 cm</p>
-                <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-900">
-                  <div>Height (in) = 175 ÷ 2.54 = 68.90</div>
-                  <div>Inches over 60 = 68.90 − 60 = 8.90</div>
-                  <div>IBW = 50 + 2.3 × 8.90 = 70.47</div>
-                  <div>IBW = 70.5 kg (rounded)</div>
-                </div>
-                <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-                  <p className="text-sm font-semibold text-emerald-900">Answer: 70.5 kg</p>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm border-l-4 border-emerald-500">
-                <p className="font-medium text-gray-900">Example 2 (Female): Height 160 cm</p>
-                <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-900">
-                  <div>Height (in) = 160 ÷ 2.54 = 62.99</div>
-                  <div>Inches over 60 = 62.99 − 60 = 2.99</div>
-                  <div>IBW = 45.5 + 2.3 × 2.99 = 52.38</div>
-                  <div>IBW = 52.4 kg (rounded)</div>
-                </div>
-                <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-                  <p className="text-sm font-semibold text-emerald-900">Answer: 52.4 kg</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Practice questions (MANDATORY) */}
-          <section id="practice" className="mb-12">
-            <h2 className="text-xl font-semibold text-gray-900">Practice questions</h2>
-            <p className="mt-2 text-sm text-gray-700">
-              Designed for student nurses, junior doctors, and pharmacists who want to verify their steps. Try it first,
-              then reveal the answer and working.
+            <p className="mt-4 text-sm leading-6 text-gray-600">
+              Both equations use 2.3 kg for each inch above 5 feet. The male base is 50 kg and the female base is 45.5 kg, so the same height produces results that differ by 4.5 kg. Other IBW equations use different constants and can return different estimates.
             </p>
+          </section>
 
-            <div className="mt-4 space-y-4">
-              {practiceQuestions.map((pq) => (
-                <details key={pq.q} className="group rounded-xl border border-emerald-200 bg-white p-4 shadow-sm">
-                  <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
-                    <p className="font-semibold text-gray-900">{pq.q}</p>
-
-                    <span className="shrink-0 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white group-open:hidden">
-                      Show answer + working
-                    </span>
-                    <span className="shrink-0 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hidden group-open:inline">
-                      Hide
-                    </span>
-                  </summary>
-
-                  <div className="mt-4 space-y-3">
-                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-900">
-                      {pq.steps.map((s) => (
-                        <div key={s}>{s}</div>
-                      ))}
-                    </div>
-
-                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-                      <p className="text-sm font-semibold text-emerald-900">Answer: {pq.answer}</p>
-                    </div>
+          <section id="examples" className="mb-10">
+            <h2 className="mb-4 text-2xl font-bold text-gray-900">Devine formula worked examples</h2>
+            <div className="grid gap-4 lg:grid-cols-2">
+              {[
+                { title: "Male example: 175 cm", example: maleWorkedExample },
+                { title: "Female example: 160 cm", example: femaleWorkedExample },
+              ].map(({ title, example }) => (
+                <article key={title} className="space-y-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+                  <h3 className="font-semibold text-gray-950">{title}</h3>
+                  <div className="rounded-xl bg-white p-4 font-mono text-xs leading-6 text-gray-700 sm:text-sm">
+                    {example.working.map((line) => <div key={line}>{line}</div>)}
                   </div>
-                </details>
+                  <div className="rounded-xl border border-emerald-200 bg-white p-3 text-sm font-semibold text-emerald-900">
+                    Exact result: {formatDevineNumber(example.exact, 4)} kg. Displayed to one decimal place: {formatDevineNumber(example.exact, 1)} kg.
+                  </div>
+                </article>
               ))}
             </div>
           </section>
 
-          {/* Clinical safety note (MANDATORY) */}
-          <section className="mb-12">
-            <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-5">
-              <h2 className="text-base font-semibold text-yellow-900">Clinical safety note</h2>
-              <p className="mt-2 text-sm text-yellow-900">
-                IBW is an estimate used in some protocols. Always confirm which weight metric your guideline requires
-                (actual, ideal, adjusted, or PBW) and follow local pharmacy/ICU protocols, including rounding rules.
-              </p>
+          <details className="group mb-6 overflow-hidden rounded-2xl border border-emerald-200 bg-white">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-semibold text-gray-900 [&::-webkit-details-marker]:hidden">
+              Common ideal body weight examples
+              <span className="text-sm font-medium text-emerald-700 group-open:hidden">Show</span>
+              <span className="hidden text-sm font-medium text-emerald-700 group-open:inline">Hide</span>
+            </summary>
+            <div className="border-t border-emerald-200 p-5">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {commonExamples.map((example) => (
+                  <div key={example.label} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                    <p className="text-sm font-semibold text-gray-900">{example.label}</p>
+                    <p className="mt-1 text-xs leading-5 text-gray-600">{example.working}</p>
+                    <p className="mt-2 text-lg font-bold text-emerald-700">{example.answer}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </details>
+
+          <section className="mb-10">
+            <h2 className="mb-4 text-2xl font-bold text-gray-900">Which body-weight measure does this page calculate?</h2>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+                <h3 className="font-semibold text-gray-900">Devine IBW</h3>
+                <p className="mt-2 text-sm leading-6 text-gray-700">This is the only body-weight measure calculated on this page. Use it when the clinical reference explicitly requires Devine ideal body weight.</p>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                <h3 className="font-semibold text-gray-900">Actual or adjusted weight</h3>
+                <p className="mt-2 text-sm leading-6 text-gray-700">Actual weight is measured. Adjusted weight is a separate formula that uses actual weight and IBW. Neither is calculated here.</p>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                <h3 className="font-semibold text-gray-900">Ventilation PBW</h3>
+                <p className="mt-2 text-sm leading-6 text-gray-700">Predicted body weight for ventilation is a separate protocol-specific calculation. Do not substitute Devine IBW automatically.</p>
+              </div>
             </div>
           </section>
 
-          {/* Related calculators (RULES: hardcode Next/Link only, omit unknown routes) */}
-          <section className="mb-12">
-            <h2 className="text-xl font-semibold text-gray-900">Related calculators</h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-3">
-              <Link
-                href="/calculator/body-composition/bsa"
-                className="group rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50"
-              >
-                <p className="font-medium text-gray-900 group-hover:text-emerald-600">Body Surface Area (BSA)</p>
-                <p className="mt-1 text-sm text-gray-600">Commonly used for chemotherapy dosing support.</p>
-              </Link>
-
-              <Link
-                href="/calculator/renal-function/creatinine-clearance"
-                className="group rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50"
-              >
-                <p className="font-medium text-gray-900 group-hover:text-emerald-600">Creatinine Clearance</p>
-                <p className="mt-1 text-sm text-gray-600">Renal function estimate used in medication dosing support.</p>
-              </Link>
-
-              <Link
-                href="/calculator/dose-calculations/mgkg-to-ml-dose"
-                className="group rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50"
-              >
-                <p className="font-medium text-gray-900 group-hover:text-emerald-600">mg/kg to mL Dose</p>
-                <p className="mt-1 text-sm text-gray-600">Convert a weight-based dose into a liquid volume.</p>
-              </Link>
+          <details id="practice" className="group mb-6 scroll-mt-24 overflow-hidden rounded-2xl border border-emerald-200 bg-white">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-semibold text-gray-900 [&::-webkit-details-marker]:hidden">
+              Practice questions with working
+              <span className="text-sm font-medium text-emerald-700 group-open:hidden">Show</span>
+              <span className="hidden text-sm font-medium text-emerald-700 group-open:inline">Hide</span>
+            </summary>
+            <div className="space-y-3 border-t border-emerald-200 p-5">
+              {practiceQuestions.map((item) => (
+                <details key={item.q} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  <summary className="cursor-pointer font-semibold text-gray-900">{item.q}</summary>
+                  <div className="mt-4 space-y-3">
+                    <div className="rounded-lg border border-gray-200 bg-white p-4 font-mono text-sm text-gray-700">
+                      {item.steps.map((step) => (
+                        <div key={step}>{step}</div>
+                      ))}
+                    </div>
+                    <p className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-900">
+                      Answer: {item.answer}
+                    </p>
+                  </div>
+                </details>
+              ))}
             </div>
-          </section>
+          </details>
 
-          {/* FAQs (MANDATORY) */}
-          <section id="faqs" className="mb-12">
-            <h2 className="text-xl font-semibold text-gray-900">FAQs</h2>
-            <div className="mt-4">
-              <FAQAccordion items={faqItems} />
+          <details id="faqs" className="group mb-10 scroll-mt-24 overflow-hidden rounded-2xl border border-emerald-200 bg-white">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-semibold text-gray-900 [&::-webkit-details-marker]:hidden">
+              Ideal body weight FAQ
+              <span className="text-sm font-medium text-emerald-700 group-open:hidden">Show</span>
+              <span className="hidden text-sm font-medium text-emerald-700 group-open:inline">Hide</span>
+            </summary>
+            <div className="space-y-3 border-t border-emerald-200 p-5">
+              {faqItems.map((item) => (
+                <details key={item.question} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  <summary className="cursor-pointer font-semibold text-gray-900">{item.question}</summary>
+                  <div className="mt-3 space-y-3 text-sm leading-6 text-gray-700">
+                    <p className="font-medium text-gray-900">{item.quickAnswer}</p>
+                    {item.details.length > 0 && (
+                      <ul className="list-disc space-y-1 pl-5">
+                        {item.details.map((detail) => (
+                          <li key={detail}>{detail}</li>
+                        ))}
+                      </ul>
+                    )}
+                    {item.microExample && <p className="rounded-lg bg-white p-3 font-mono text-xs text-gray-600">{item.microExample}</p>}
+                  </div>
+                </details>
+              ))}
             </div>
-          </section>
+          </details>
 
-          {/* References (MANDATORY) */}
-          <section id="references" className="mb-12">
-            <h2 className="text-xl font-semibold text-gray-900">References &amp; Sources</h2>
+          <RelatedCalculators
+            theme="body"
+            title="Related dosing weight calculators"
+            description="Use these calculators when ideal body weight connects to BSA, renal dosing, or weight-based medication maths."
+            items={getCalculatorNetworkItems("/calculator/body-composition/ideal-body-weight")}
+          />
 
-            <div className="mt-6 space-y-8">
+          <CalculatorTrustBlock
+            theme="body"
+            author={{ name: "George Lambroglou", credentials: "RN", href: "/about" }}
+            lastReviewed={{ iso: UPDATED_DATE_ISO, label: UPDATED_DATE_HUMAN }}
+            note="This calculator estimates adult Devine ideal body weight only for heights of at least 5 feet. It does not choose a medication dosing weight or calculate adjusted weight or ventilation predicted body weight."
+            className="mb-10"
+          />
+
+          <details id="references" className="group mb-10 scroll-mt-24 overflow-hidden rounded-2xl border border-gray-200 bg-gray-50">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xl font-bold text-gray-900 [&::-webkit-details-marker]:hidden">
+              References and sources
+              <span className="text-sm font-medium text-emerald-700 group-open:hidden">Show</span>
+              <span className="hidden text-sm font-medium text-emerald-700 group-open:inline">Hide</span>
+            </summary>
+            <div className="space-y-8 border-t border-gray-200 p-5">
               {referenceGroups.map((group) => (
                 <div key={group.heading}>
                   <h3 className="text-sm font-semibold text-gray-700">{group.heading}</h3>
-
                   <div className="mt-3 space-y-3">
-                    {group.items.map((r) => (
+                    {group.items.map((reference) => (
                       <a
-                        key={r.href}
-                        href={r.href}
+                        key={reference.href}
+                        href={reference.href}
                         target="_blank"
                         rel="noreferrer"
                         className="group flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50"
                       >
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="font-medium text-gray-900 transition group-hover:text-emerald-600">
-                              {r.title}
-                            </p>
-                            <span className="rounded-md border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs text-gray-700">
-                              {r.badge}
-                            </span>
+                            <p className="font-medium text-gray-900 transition group-hover:text-emerald-700">{reference.title}</p>
+                            <span className="rounded-md border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs text-gray-700">{reference.badge}</span>
                           </div>
-
-                          <p className="mt-1 text-sm text-gray-600">{r.org}</p>
-                          <p className="mt-1 text-sm text-gray-700">{r.description}</p>
+                          <p className="mt-1 text-sm text-gray-600">{reference.org}</p>
+                          <p className="mt-1 text-sm leading-6 text-gray-700">{reference.description}</p>
                         </div>
-
                         <ExternalLinkIcon />
                       </a>
                     ))}
                   </div>
                 </div>
               ))}
+              <p className="text-sm text-gray-600">References are provided for education. Follow the medication reference, pharmacist guidance, and local clinical protocol.</p>
             </div>
-
-            <p className="mt-5 text-sm text-gray-600">
-              References are provided for education. Always follow local protocol and pharmacist/ICU guidance.
-            </p>
-          </section>
+          </details>
         </div>
       </main>
 

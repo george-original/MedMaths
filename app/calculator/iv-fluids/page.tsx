@@ -2,9 +2,19 @@ import { IVFluidsCategoryClient } from "./client"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "IV Drip Rate Calculators | mL/hr & gtt/min",
-  description: "IV drip rate calculators for mL/hr to gtt/min, drops per minute to mL/hr, and infusion time using volume, time, rate, and drop factor.",
-  keywords: ["IV drip rate calculator", "drops per minute calculator", "gtt/min calculator", "mL/hr calculator", "infusion time calculator"],
+  title: "IV Fluid Calculators | Drip Rate & Infusion Time",
+  description:
+    "Browse IV fluid calculators for mL/hr, gtt/min, total volume, infusion duration, and clock finish time. Choose the tool that matches the known values.",
+  keywords: [
+    "IV drip rate calculator",
+    "mL/hr to gtt/min calculator",
+    "gtt/min to mL/hr calculator",
+    "drops per minute calculator",
+    "drop factor calculator",
+    "infusion time calculator",
+    "IV flow rate formula",
+    "nursing IV calculations",
+  ],
   authors: [{ name: "George Lambroglou, RN", url: "https://www.medmaths.com/about" }],
   creator: "George Lambroglou, RN",
   publisher: "MedMaths",
@@ -21,8 +31,9 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "IV Drip Rate Calculators | mL/hr & gtt/min",
-    description: "IV drip rate calculators for mL/hr to gtt/min, drops per minute to mL/hr, and infusion time using volume, time, rate, and drop factor.",
+    title: "IV Fluid Calculators | Drip Rate & Infusion Time",
+    description:
+      "Convert IV rates between mL/hr and drops per minute, calculate infusion time, and learn the drop factor formulas used in nursing IV calculations.",
     url: "https://www.medmaths.com/calculator/iv-fluids",
     siteName: "MedMaths",
     type: "website",
@@ -30,8 +41,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "IV Drip Rate Calculators | mL/hr & gtt/min",
-    description: "IV drip rate calculators for mL/hr to gtt/min, drops per minute to mL/hr, and infusion time using volume, time, rate, and drop factor.",
+    title: "IV Fluid Calculators | Drip Rate & Infusion Time",
+    description:
+      "Convert IV rates between mL/hr and gtt/min, calculate infusion time, and learn the drop factor formulas used in nursing IV calculations.",
   },
 }
 

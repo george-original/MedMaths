@@ -91,9 +91,8 @@ export function SiteFooter() {
               medmaths.calc@gmail.com
             </a>
           </p>
-          <p className="text-xs text-muted-foreground mt-2">
-            If this is a medical emergency, call your local emergency number immediately (e.g., 000 AU / 911 US / 112
-            EU/UK) or go to your nearest emergency department.
+          <p className="mt-2 text-xs text-muted-foreground">
+            In Australia, call Triple Zero (000) for a serious or urgent emergency. Outside Australia, use your local emergency number.
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             MedMaths is not a substitute for professional medical advice, diagnosis, or treatment.

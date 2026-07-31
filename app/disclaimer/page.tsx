@@ -1,4 +1,6 @@
 import type { Metadata } from "next"
+import Link from "next/link"
+import { AlertTriangle, CircleCheck, ExternalLink } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 
@@ -36,109 +38,102 @@ export const metadata: Metadata = {
   },
 }
 
+const mustCheck = [
+  "The original medication or fluid order",
+  "The medicine name, formulation, concentration, and product label",
+  "Patient-specific factors, contraindications, allergies, and current clinical status",
+  "Maximum doses, dose frequency, renal or hepatic guidance, and protocol-specific limits",
+  "Compatibility, stability, route, device, preparation technique, and administration requirements",
+  "Local policy, independent double-check requirements, and escalation pathways",
+]
+
 export default function DisclaimerPage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="flex min-h-screen flex-col bg-white">
       <SiteHeader />
-      <div className="flex-1">
-        <div className="container mx-auto px-4 py-20">
-          <div className="prose prose-sm dark:prose-invert max-w-3xl mx-auto">
-            <h1 className="text-4xl font-bold mb-8">Medical Disclaimer</h1>
+      <main className="flex-1">
+        <div className="mx-auto max-w-4xl px-4 pb-16 pt-28 sm:px-6 lg:px-8">
+          <header>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-red-700">Important safety information</p>
+            <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-950 sm:text-5xl">Medical Disclaimer</h1>
+            <p className="mt-4 text-sm font-semibold text-gray-600">Last reviewed: 11 July 2026</p>
+          </header>
 
-            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 mb-8">
-              <p className="font-bold text-lg mb-4">IMPORTANT - PLEASE READ CAREFULLY</p>
-              <p className="text-sm">
-                The information, calculators, and educational content provided on MedMaths (medmaths.com) are for
-                informational and educational purposes only and are not intended to replace professional medical advice,
-                diagnosis, or treatment.
-              </p>
+          <section className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-5 sm:p-7">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="mt-0.5 size-6 shrink-0 text-red-700" aria-hidden="true" />
+              <div>
+                <h2 className="text-xl font-bold text-red-950">Do not use a calculator result as the sole basis for patient care</h2>
+                <p className="mt-3 leading-7 text-red-950">
+                  MedMaths calculators provide arithmetic support and educational working. They do not provide medical advice, prescribe or validate a dose, confirm that a medicine is appropriate, or replace assessment by a qualified health professional.
+                </p>
+              </div>
             </div>
+          </section>
 
-            <h2 className="text-2xl font-bold mt-8 mb-4">1. Not Medical Advice</h2>
-            <p>
-              Nothing on this website constitutes professional medical advice, diagnosis, prognosis, or treatment. The
-              calculators and information provided are educational tools designed to support healthcare professionals
-              and students. They should not be used to make clinical decisions without professional supervision.
-            </p>
-
-            <h2 className="text-2xl font-bold mt-8 mb-4">2. Always Consult Healthcare Professionals</h2>
-            <p>
-              Always consult with a qualified healthcare professional (physician, nurse, pharmacist, or other licensed
-              practitioner) before:
-            </p>
-            <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Starting or changing any medication or treatment</li>
-              <li>Making any clinical decision based on calculator results</li>
-              <li>Acting on any health information obtained from this website</li>
-              <li>Self-diagnosing or self-treating medical conditions</li>
+          <section className="mt-8 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7">
+            <h2 className="text-2xl font-bold text-gray-950">Before acting on any result</h2>
+            <ul className="mt-4 space-y-3">
+              {mustCheck.map((item) => (
+                <li key={item} className="flex gap-3 text-gray-700">
+                  <CircleCheck className="mt-0.5 size-5 shrink-0 text-cyan-700" aria-hidden="true" />
+                  <span>{item}</span>
+                </li>
+              ))}
             </ul>
+          </section>
 
-            <h2 className="text-2xl font-bold mt-8 mb-4">3. Accuracy and Limitations</h2>
-            <p>While we strive to ensure the accuracy of our calculators:</p>
-            <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Mathematical errors or computational mistakes may occur</li>
-              <li>Clinical formulas change and may be outdated</li>
-              <li>Results should be verified with current clinical guidelines</li>
-              <li>Individual patient factors may not be fully accounted for</li>
-              <li>We do not guarantee accuracy, completeness, or timeliness of information</li>
-            </ul>
-
-            <h2 className="text-2xl font-bold mt-8 mb-4">4. Individual Variation</h2>
-            <p>
-              Medical calculations often involve population-based formulas that may not account for individual patient
-              variations. Clinical judgment and professional assessment are essential when applying calculator results
-              to patient care.
-            </p>
-
-            <h2 className="text-2xl font-bold mt-8 mb-4">5. Emergency Situations</h2>
-            <p>
-              If you are experiencing a medical emergency, please call emergency services (911 in the US) or go to the
-              nearest emergency department immediately. Do not rely on this website for emergency medical assistance.
-            </p>
-
-            <h2 className="text-2xl font-bold mt-8 mb-4">6. No Liability</h2>
-            <p>
-              MedMaths and its creators, developers, and distributors assume no liability for any direct or indirect
-              damages, injuries, or losses resulting from the use or misuse of information, calculators, or content on
-              this website. Users assume all responsibility for their use of this website and all its content.
-            </p>
-
-            <h2 className="text-2xl font-bold mt-8 mb-4">7. Drug Administration</h2>
-            <p>
-              Never administer medications or treatments based solely on calculator results. Always verify doses,
-              routes, and frequencies with:
-            </p>
-            <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Current institutional protocols and guidelines</li>
-              <li>Prescribing information and package inserts</li>
-              <li>Qualified healthcare professionals</li>
-              <li>Clinical pharmacy resources</li>
-            </ul>
-
-            <h2 className="text-2xl font-bold mt-8 mb-4">8. For Healthcare Professionals Only</h2>
-            <p>
-              While our website is accessible to the public, some calculators are specifically designed for use by
-              licensed healthcare professionals. Lay users should only use calculators designated as educational tools
-              and should consult with healthcare providers before taking any action based on results.
-            </p>
-
-            <h2 className="text-2xl font-bold mt-8 mb-4">9. Third-Party Links</h2>
-            <p>
-              We do not endorse and are not responsible for the content, accuracy, or practices of any external websites
-              or resources linked to from MedMaths.
-            </p>
-
-            <h2 className="text-2xl font-bold mt-8 mb-4">10. Changes to Disclaimer</h2>
-            <p>This disclaimer may be updated at any time without notice. Please review it regularly for changes.</p>
-
-            <h2 className="text-2xl font-bold mt-8 mb-4">Contact Us</h2>
-            <p>
-              If you have questions about this disclaimer or our medical content, please contact us at:
-              support@medmaths.com
-            </p>
+          <div className="mt-8 grid gap-5 md:grid-cols-2">
+            <section className="rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:p-6">
+              <h2 className="text-xl font-bold text-gray-950">Accuracy and limitations</h2>
+              <p className="mt-3 text-sm leading-6 text-gray-700">
+                Reasonable care is taken when building and checking calculators, but software defects, transcription errors, outdated links, misunderstood inputs, and inappropriate application of a formula can still occur. Results must be independently verified against current authoritative guidance.
+              </p>
+            </section>
+            <section className="rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:p-6">
+              <h2 className="text-xl font-bold text-gray-950">Population formulas</h2>
+              <p className="mt-3 text-sm leading-6 text-gray-700">
+                Formulas such as body surface area, ideal body weight, and Cockcroft-Gault creatinine clearance are estimates. They may be unsuitable or require modified interpretation for particular patients, body sizes, ages, pregnancies, dialysis states, or rapidly changing clinical conditions.
+              </p>
+            </section>
+            <section className="rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:p-6">
+              <h2 className="text-xl font-bold text-gray-950">External resources</h2>
+              <p className="mt-3 text-sm leading-6 text-gray-700">
+                External links are provided for transparency and education. MedMaths does not control their availability, updates, or clinical governance and does not endorse every statement on a linked website.
+              </p>
+            </section>
+            <section className="rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:p-6">
+              <h2 className="text-xl font-bold text-gray-950">Use and responsibility</h2>
+              <p className="mt-3 text-sm leading-6 text-gray-700">
+                Users remain responsible for checking inputs, units, results, and clinical applicability. To the extent permitted by law, MedMaths does not accept liability for loss or harm arising from reliance on, misuse of, or inability to access the site.
+              </p>
+            </section>
           </div>
+
+          <section className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
+            <h2 className="text-xl font-bold text-amber-950">Medical emergency</h2>
+            <p className="mt-3 text-sm leading-6 text-amber-950">
+              Do not use MedMaths for emergency assessment or treatment. In Australia, call <strong>Triple Zero (000)</strong> for a serious or urgent emergency, or attend the nearest emergency department. Outside Australia, use your local emergency number.
+            </p>
+            <a
+              href="https://www.healthdirect.gov.au/calling-triple-zero"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-950 underline underline-offset-4"
+            >
+              Healthdirect guidance on calling Triple Zero <ExternalLink className="size-3.5" aria-hidden="true" />
+            </a>
+          </section>
+
+          <section className="mt-8 text-sm leading-6 text-gray-700">
+            <h2 className="text-xl font-bold text-gray-950">Corrections and contact</h2>
+            <p className="mt-3">
+              Report an incorrect result, unclear warning, broken reference, or other safety concern through the <Link href="/contact" className="font-semibold text-cyan-700 hover:underline">contact page</Link> or email <a href="mailto:medmaths.calc@gmail.com" className="font-semibold text-cyan-700 hover:underline">medmaths.calc@gmail.com</a>.
+            </p>
+            <p className="mt-3">This disclaimer may be updated as the site, calculator library, or legal requirements change.</p>
+          </section>
         </div>
-      </div>
+      </main>
       <SiteFooter />
     </div>
   )

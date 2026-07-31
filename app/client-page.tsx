@@ -1,203 +1,203 @@
-"use client"
-
-import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { ArrowRight, BookOpen, Calculator, Search, ShieldCheck, Stethoscope } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { CalculatorSearch } from "@/components/calculator-search"
 import { TopCalculators } from "@/components/top-calculators"
-import { Droplet, Beaker, Pill, Weight, Activity, Syringe } from "lucide-react"
+import {
+  CalculatorTopicGrid,
+  CalculatorTrustBlock,
+  DirectoryDisclosure,
+} from "@/components/calculator"
+import { allCalculatorCatalogItems, calculatorCatalog } from "@/lib/calculator-catalog"
 
-const categoryTheme: Record<string, { accent: string }> = {
-  "Dose Calculations": { accent: "#06b6d4" },
-  "Tablet & Oral Dosing": { accent: "#f97316" },
-  "IV Fluids & Infusions": { accent: "#3b82f6" },
-  "Dilutions & Reconstitution": { accent: "#8b5cf6" },
-  "Dosing Body Measures": { accent: "#22c55e" },
-  "Renal Dosing Support": { accent: "#2563eb" },
-}
-
-const calculatorCategories = [
+const homeFaqItems = [
   {
-    name: "Dose Calculations",
-    slug: "dose-calculations",
-    description: "mg to mL, mg/kg to mL, and units to mL dose checks.",
-    count: "3",
-    href: "/calculator/dose-calculations",
-    icon: Syringe,
+    question: "What is MedMaths?",
+    answer:
+      "MedMaths is a focused medical maths calculator library for medication dose conversions, tablet dosing, IV drip rates, dilutions, body surface area, ideal body weight, and creatinine clearance.",
   },
   {
-    name: "Tablet & Oral Dosing",
-    slug: "tablet-dosing",
-    description: "mg to tablets and weight-based tablet calculations.",
-    count: "2",
-    href: "/calculator/tablet-dosing",
-    icon: Pill,
+    question: "Is Med Maths the same as MedMaths?",
+    answer:
+      "Yes. Med Maths is the spaced version of the MedMaths brand name. Both refer to this medication maths calculator website.",
   },
   {
-    name: "IV Fluids & Infusions",
-    slug: "iv-fluids",
-    description: "mL/hr, gtt/min, and infusion time calculations.",
-    count: "3",
-    href: "/calculator/iv-fluids",
-    icon: Droplet,
+    question: "Which MedMaths calculator should I use first?",
+    answer:
+      "Start with the units in the medication order and product label. Use mg to mL for liquid dose volume, mg/kg tools for weight-based dosing, tablet calculators for tablet quantities, IV calculators for drip rates or infusion time, and the renal or body measure tools when a reference specifically requires CrCl, BSA, or IBW.",
   },
   {
-    name: "Dilutions & Reconstitution",
-    slug: "dilutions",
-    description: "C1V1=C2V2, vial dose to mL, and reconstitution calculations.",
-    count: "3",
-    href: "/calculator/dilutions",
-    icon: Beaker,
-  },
-  {
-    name: "Dosing Body Measures",
-    slug: "body-composition",
-    description: "BSA and ideal body weight for medication dose context.",
-    count: "2",
-    href: "/calculator/body-composition",
-    icon: Weight,
-  },
-  {
-    name: "Renal Dosing Support",
-    slug: "renal-function",
-    description: "Creatinine clearance for medication dosing context.",
-    count: "1",
-    href: "/calculator/renal-function",
-    icon: Activity,
+    question: "Does MedMaths replace clinical judgement?",
+    answer:
+      "No. MedMaths shows formulas and arithmetic. It does not recommend doses, validate medication orders, diagnose conditions, or replace product information, local policy, or clinical review.",
   },
 ]
 
 export default function ClientPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-white">
       <SiteHeader />
 
-      <section className="container mx-auto px-6 pt-32 pb-16 md:pt-40 md:pb-20">
-        <div className="mx-auto max-w-4xl">
-          <p className="mb-4 text-center text-sm font-semibold uppercase tracking-[0.2em] text-cyan-600">
-            Medication maths for clinical practice
-          </p>
-          <h1 className="mb-6 text-center text-balance text-4xl font-bold tracking-tight text-foreground md:text-6xl lg:text-7xl">
-            Medication dose calculators for nurses and clinicians.
-          </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-center text-pretty text-lg text-muted-foreground md:text-xl">
-            Use focused calculators for mg to mL conversions, tablet dosage, IV drip rates, infusion time, dilutions, BSA, ideal body weight, and Cockcroft-Gault creatinine clearance.
-          </p>
-          <div className="mx-auto max-w-2xl mb-10">
-            <CalculatorSearch />
+      <main className="pt-20">
+        <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+          <div className="mx-auto max-w-4xl text-center">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3.5 py-2 text-xs font-bold uppercase tracking-[0.12em] text-cyan-800">
+              <Calculator className="size-4" aria-hidden="true" />
+              {allCalculatorCatalogItems.length} calculators across {calculatorCatalog.length} topics
+            </div>
+
+            <h1 className="text-balance text-4xl font-bold tracking-tight text-gray-950 sm:text-5xl lg:text-6xl">
+              Medication maths calculators for clear, focused arithmetic checks
+            </h1>
+            <p className="mx-auto mt-5 max-w-3xl text-pretty text-base leading-7 text-gray-600 sm:text-lg">
+              MedMaths provides free calculators for mg to mL, mg/kg doses, tablets, IV drip rates, infusion time, dilutions, BSA, ideal body weight, and Cockcroft-Gault creatinine clearance.
+            </p>
+
+            <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-cyan-200 bg-cyan-50/60 p-3 text-left shadow-sm sm:p-4">
+              <div className="mb-2 flex items-center gap-2 px-1 text-sm font-semibold text-cyan-900">
+                <Search className="size-4" aria-hidden="true" />
+                Search all calculators
+              </div>
+              <CalculatorSearch />
+            </div>
+
+            <div className="mt-7 flex flex-wrap justify-center gap-2 text-xs font-medium text-gray-600 sm:text-sm">
+              <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5">No signup</span>
+              <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5">Calculator inputs not stored</span>
+              <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5">Formulas and working shown</span>
+              <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5">Built by an RN</span>
+            </div>
+
+            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+              <Button asChild size="lg" className="rounded-full px-6">
+                <Link href="/calculators">
+                  Browse all calculators <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="rounded-full px-6">
+                <Link href="/calculator/dose-calculations/mg-to-ml">Open mg to mL</Link>
+              </Button>
+            </div>
           </div>
-          <div className="flex flex-wrap justify-center gap-3 text-sm text-muted-foreground">
-            <span className="rounded-full border border-border px-3 py-1">No signup</span>
-            <span className="rounded-full border border-border px-3 py-1">Inputs not stored</span>
-            <span className="rounded-full border border-border px-3 py-1">Formulas shown</span>
-            <span className="rounded-full border border-border px-3 py-1">Built by an RN</span>
+        </section>
+
+        <TopCalculators />
+
+        <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+          <div className="mb-7 max-w-3xl">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">Browse by topic</p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-950 sm:text-3xl">
+              Choose the calculation type that matches the order
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-gray-600 sm:text-base">
+              Start with the units and wording in the problem. Each topic page explains which calculator fits and keeps its own colour identity.
+            </p>
           </div>
-        </div>
-      </section>
+          <CalculatorTopicGrid />
+        </section>
 
-      <TopCalculators />
+        <section className="mx-auto max-w-6xl px-4 pb-12 sm:px-6 lg:px-8 lg:pb-16">
+          <div className="rounded-3xl border border-amber-200 bg-amber-50 p-5 sm:p-7">
+            <div className="flex items-start gap-4">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white">
+                <ShieldCheck className="size-5" aria-hidden="true" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-amber-950">Calculation support, not prescribing advice</h2>
+                <p className="mt-2 text-sm leading-6 text-amber-950">
+                  MedMaths shows arithmetic and calculation methods. Always confirm the medication order, product strength, units, route, frequency, patient factors, maximum dose limits, compatibility, and local independent-check requirements before using a result.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      <section className="container mx-auto px-6 pb-20">
-        <h2 className="mb-3 text-center text-3xl font-bold text-foreground">Browse the focused calculator set</h2>
-        <p className="mx-auto mb-8 max-w-2xl text-center text-sm text-muted-foreground">
-          Each calculator is built around one search intent, one formula, clear units, worked examples, and safer medication maths scope.
-        </p>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {calculatorCategories.map((category) => {
-            const Icon = category.icon
-            const theme = categoryTheme[category.name] || { accent: "#3b82f6" }
+        <section className="border-y border-gray-200 bg-gray-50/70">
+          <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+            <div className="mb-7 text-center">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">About the library</p>
+              <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-950 sm:text-3xl">
+                Medical maths calculators, explained clearly
+              </h2>
+              <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-gray-600">
+                The longer educational and search information remains available without pushing the calculators down the page.
+              </p>
+            </div>
 
-            return (
-              <Link key={category.slug} href={category.href} className="group block h-full">
-                <div className="relative h-full overflow-hidden rounded-xl border border-border bg-card p-5 shadow-sm transition-all hover:border-border/80 hover:bg-card/60 hover:shadow-md">
-                  <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: theme.accent }} />
+            <div className="space-y-3">
+              <DirectoryDisclosure title="What MedMaths covers" icon={<Stethoscope className="size-5" aria-hidden="true" />}>
+                <p>
+                  MedMaths is a focused medical maths calculator library. It covers common medication calculation methods including dose-to-volume conversions, weight-based doses, tablet quantities, IV drip rates, infusion duration, stock dilution, final IV concentration, body surface area, ideal body weight, and creatinine clearance.
+                </p>
+                <p className="mt-3">
+                  Some people search for the brand as <strong>MedMaths</strong>, while others type <strong>Med Maths</strong>. Both names refer to the same calculator library.
+                </p>
+              </DirectoryDisclosure>
 
-                  <div className="pl-2">
-                    <div className="mb-3 flex items-start justify-between gap-3">
-                      <div className="flex flex-1 items-center gap-3">
-                        <div className="rounded-lg p-2" style={{ backgroundColor: `${theme.accent}15` }}>
-                          <Icon className="h-4 w-4" style={{ color: theme.accent }} />
-                        </div>
-                        <h3 className="text-sm font-semibold text-foreground">{category.name}</h3>
-                      </div>
+              <DirectoryDisclosure title="How to choose a calculator" icon={<Search className="size-5" aria-hidden="true" />}>
+                <p>
+                  Start with the unit written in the medication order. Use mg to mL for a liquid dose, mg/kg tools when patient weight is part of the order, tablet calculators for fixed oral strengths, IV calculators for mL/hr or gtt/min questions, and dilution tools for concentration-volume arithmetic or final IV concentration checks.
+                </p>
+                <p className="mt-3">
+                  BSA, ideal body weight, and creatinine clearance should be used only when the relevant medicine reference or protocol specifically requires that measure.
+                </p>
+              </DirectoryDisclosure>
 
-                      <div
-                        className="shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium"
-                        style={{ borderColor: theme.accent, color: theme.accent }}
-                      >
-                        {category.count}
-                      </div>
-                    </div>
-
-                    <p className="text-xs leading-relaxed text-muted-foreground">{category.description}</p>
+              <DirectoryDisclosure title="How the pages are structured" icon={<BookOpen className="size-5" aria-hidden="true" />}>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div>
+                    <h3 className="font-semibold text-gray-950">Calculation first</h3>
+                    <p className="mt-1">The calculator, formula, result, and working appear before long educational content.</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-950">Clinical units</h3>
+                    <p className="mt-1">Labels use practical medication maths units such as mg/mL, tablets, gtt/min, and mL/hr.</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-950">Narrow scope</h3>
+                    <p className="mt-1">The site supports arithmetic checks without turning the result into a dose recommendation.</p>
                   </div>
                 </div>
-              </Link>
-            )
-          })}
-        </div>
-      </section>
+              </DirectoryDisclosure>
 
-      <section className="border-y border-border/40 bg-muted/20">
-        <div className="container mx-auto px-6 py-12">
-          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-            <div className="text-center">
-              <div className="mb-1 text-4xl font-semibold tracking-tight text-foreground">14</div>
-              <div className="text-sm text-muted-foreground">Focused tools</div>
+              <DirectoryDisclosure title="MedMaths frequently asked questions" icon={<Calculator className="size-5" aria-hidden="true" />}>
+                <div className="space-y-5">
+                  {homeFaqItems.map((item) => (
+                    <div key={item.question}>
+                      <h3 className="font-semibold text-gray-950">{item.question}</h3>
+                      <p className="mt-1">{item.answer}</p>
+                    </div>
+                  ))}
+                </div>
+              </DirectoryDisclosure>
             </div>
-            <div className="text-center">
-              <div className="mb-1 text-4xl font-semibold tracking-tight text-foreground">Private</div>
-              <div className="text-sm text-muted-foreground">Inputs not stored</div>
-            </div>
-            <div className="text-center">
-              <div className="mb-1 text-4xl font-semibold tracking-tight text-foreground">Clear</div>
-              <div className="text-sm text-muted-foreground">Formulas included</div>
-            </div>
-            <div className="text-center">
-              <div className="mb-1 text-4xl font-semibold tracking-tight text-foreground">Free</div>
-              <div className="text-sm text-muted-foreground">No account needed</div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      <section className="container mx-auto px-6 py-20 md:py-28">
-        <h2 className="mb-4 text-center text-4xl font-bold tracking-tight text-foreground md:text-5xl">Why this focused library is stronger</h2>
-        <p className="mx-auto mb-12 max-w-2xl text-center text-lg text-muted-foreground">
-          MedMaths is built around the medication calculations people commonly need to check: dose conversions, tablets, IV rates, dilutions, body measures, and renal dosing support.
-        </p>
+            <CalculatorTrustBlock
+              theme="neutral"
+              className="mt-6"
+              author={{ name: "George Lambroglou", credentials: "RN", href: "/about" }}
+              lastReviewed={{ iso: "2026-07-11", label: "11 July 2026" }}
+              note="MedMaths provides calculation and education tools. It does not prescribe, recommend, or independently validate medication doses."
+            />
+          </div>
+        </section>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          <div className="rounded-2xl border border-border bg-card p-8">
-            <h3 className="mb-2 text-xl font-semibold text-foreground">Calculation first</h3>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              Pages put the calculator, formula, and worked examples before long educational content.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-border bg-card p-8">
-            <h3 className="mb-2 text-xl font-semibold text-foreground">Nursing-friendly wording</h3>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              Labels use real medication maths language, such as mg/mL, mg per 5 mL, tablets, gtt/min, and mL/hr.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-border bg-card p-8">
-            <h3 className="mb-2 text-xl font-semibold text-foreground">Safer scope</h3>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              The site stays in a narrow lane: medication maths, not broad diagnostic scoring or general medical calculators.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="container mx-auto px-6 py-16 text-center md:py-24">
-        <h2 className="mb-6 text-balance text-4xl font-bold tracking-tight text-foreground md:text-5xl">
-          Start with the calculator people already need.
-        </h2>
-        <Button size="lg" asChild className="rounded-full px-8">
-          <Link href="/calculator/dose-calculations/mg-to-ml">Open mg to mL calculator</Link>
-        </Button>
-      </section>
+        <section className="mx-auto max-w-6xl px-4 py-14 text-center sm:px-6 lg:px-8 lg:py-20">
+          <h2 className="text-balance text-3xl font-bold tracking-tight text-gray-950 sm:text-4xl">
+            Open the full calculator directory
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-gray-600 sm:text-base">
+            View all {allCalculatorCatalogItems.length} calculators grouped by dose, tablet, IV, dilution, body measure, and renal topics.
+          </p>
+          <Button asChild size="lg" className="mt-6 rounded-full px-7">
+            <Link href="/calculators">
+              Browse all calculators <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+          </Button>
+        </section>
+      </main>
 
       <SiteFooter />
     </div>

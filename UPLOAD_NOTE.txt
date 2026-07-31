@@ -1,9 +1,15 @@
-MedMaths v6 clean full project.
+Authoritative MedMaths development build: Batch 38 — Medication Dilution C1V1=C2V2 Refinement
 
-For GitHub/Vercel:
-1. Extract this ZIP first.
-2. Upload/copy the extracted contents into the repository root.
-3. The repository root should contain app/, components/, lib/, public/, package.json, next.config.mjs, etc.
-4. Do not upload this ZIP file as a single file into the repo.
+This build includes all work through Batch 38.
 
-This package includes components/site-footer.tsx and the updated lib/seo-utils.ts exports required by calculator-search.tsx.
+Key Batch 38 changes:
+- C1V1=C2V2 repositioned around medication-dilution intent rather than general chemistry
+- all four solve paths retained: V1, V2, C1, and C2
+- final total volume and arithmetic diluent difference clarified
+- testable formula logic extracted into a shared library
+- FAQs reduced to 8, practice questions to 4, and worked examples to 3
+- generic temperature/density content removed
+- official medication-calculation, labelling, and high-risk-medicine references added
+- dedicated C1V1=C2V2 regression coverage added
+
+Before production deployment, run pnpm install --frozen-lockfile, pnpm check, and browser smoke testing in the deployment environment.

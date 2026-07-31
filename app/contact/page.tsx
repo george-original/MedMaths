@@ -1,4 +1,6 @@
 import type { Metadata } from "next"
+import Link from "next/link"
+import { AlertTriangle, Bug, Calculator, Mail, ShieldAlert } from "lucide-react"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { Button } from "@/components/ui/button"
@@ -37,65 +39,69 @@ export const metadata: Metadata = {
   },
 }
 
+const reportItems = [
+  { icon: Calculator, title: "Formula or result issue", text: "Include the calculator, values entered, result shown, expected result, and your supporting calculation or reference." },
+  { icon: ShieldAlert, title: "Safety or wording concern", text: "Describe the warning, instruction, or visual that may be unclear, misleading, or unsafe." },
+  { icon: Bug, title: "Technical problem", text: "Include the page, device, browser, and what happened. A screenshot is useful when available." },
+]
+
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="flex min-h-screen flex-col bg-white">
       <SiteHeader />
-      <div className="flex-1">
-        <div className="container mx-auto px-4 py-20">
-          <div className="max-w-2xl mx-auto">
-            <h1 className="text-4xl font-bold mb-4">Contact Us</h1>
-            <p className="text-muted-foreground mb-8">
-              Have questions or feedback? We'd love to hear from you. Send us a message and we'll respond as soon as
-              possible.
+      <main className="flex-1">
+        <div className="mx-auto max-w-3xl px-4 pb-16 pt-28 sm:px-6 lg:px-8">
+          <header>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">Feedback and corrections</p>
+            <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-950 sm:text-5xl">Contact MedMaths</h1>
+            <p className="mt-4 text-lg leading-8 text-gray-700">
+              Report a calculation issue, unclear safety message, broken link, accessibility problem, or idea for improving the calculator library.
             </p>
+          </header>
 
-            <div className="bg-muted rounded-lg p-8 space-y-6">
+          <section className="mt-8 rounded-2xl border border-cyan-200 bg-cyan-50 p-5 sm:p-7">
+            <div className="flex items-start gap-3">
+              <Mail className="mt-1 size-5 shrink-0 text-cyan-700" aria-hidden="true" />
               <div>
-                <h3 className="font-semibold mb-2">Email Support</h3>
-                <p className="text-sm text-muted-foreground">
-                  For all inquiries:{" "}
-                  <a href="mailto:medmaths.calc@gmail.com" className="text-primary hover:underline">
-                    medmaths.calc@gmail.com
-                  </a>
-                </p>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-2">Response Time</h3>
-                <p className="text-sm text-muted-foreground">
-                  We aim to respond to all inquiries within 48 hours during business days.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-2">Types of Inquiries</h3>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Calculator improvements or feature requests</li>
-                  <li>• Bug reports or technical issues</li>
-                  <li>• Content feedback or corrections</li>
-                  <li>• Partnership or collaboration opportunities</li>
-                  <li>• Privacy and data concerns</li>
-                </ul>
-              </div>
-
-              <div className="pt-4">
-                <Button asChild>
-                  <a href="mailto:medmaths.calc@gmail.com">Send Email</a>
+                <h2 className="text-xl font-bold text-gray-950">Email</h2>
+                <a href="mailto:medmaths.calc@gmail.com" className="mt-2 inline-block font-semibold text-cyan-800 underline underline-offset-4">medmaths.calc@gmail.com</a>
+                <p className="mt-2 text-sm leading-6 text-gray-700">Messages are reviewed as soon as practical. Safety-critical calculator reports are prioritised.</p>
+                <Button asChild className="mt-4 rounded-full">
+                  <a href="mailto:medmaths.calc@gmail.com?subject=MedMaths%20feedback">Send email</a>
                 </Button>
               </div>
             </div>
+          </section>
 
-            <div className="mt-12 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
-              <h3 className="font-semibold mb-2">Medical Emergency?</h3>
-              <p className="text-sm">
-                If this is an emergency, call your local emergency number (e.g., 000 AU / 911 US) or go to your nearest
-                emergency department.
-              </p>
+          <section className="mt-8">
+            <h2 className="text-2xl font-bold text-gray-950">What to include</h2>
+            <div className="mt-4 space-y-4">
+              {reportItems.map(({ icon: Icon, title, text }) => (
+                <div key={title} className="flex gap-4 rounded-2xl border border-gray-200 bg-white p-5">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gray-100 text-gray-700"><Icon className="size-5" aria-hidden="true" /></div>
+                  <div><h3 className="font-bold text-gray-950">{title}</h3><p className="mt-1 text-sm leading-6 text-gray-700">{text}</p></div>
+                </div>
+              ))}
             </div>
-          </div>
+          </section>
+
+          <section className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-800" aria-hidden="true" />
+              <div>
+                <h2 className="font-bold text-amber-950">Medical emergency</h2>
+                <p className="mt-2 text-sm leading-6 text-amber-950">
+                  MedMaths does not provide emergency assistance. In Australia, call Triple Zero (000) for a serious or urgent emergency. Outside Australia, use your local emergency number.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <p className="mt-8 text-sm leading-6 text-gray-600">
+            Read the <Link href="/editorial-policy" className="font-semibold text-cyan-700 hover:underline">editorial policy</Link> for the correction process and the <Link href="/disclaimer" className="font-semibold text-cyan-700 hover:underline">medical disclaimer</Link> for limits of use.
+          </p>
         </div>
-      </div>
+      </main>
       <SiteFooter />
     </div>
   )

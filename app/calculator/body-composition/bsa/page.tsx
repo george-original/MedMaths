@@ -4,25 +4,65 @@ import type { Metadata } from "next"
 
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
-import { FAQAccordion } from "@/components/faq-accordion"
+import { RelatedCalculators } from "@/components/related-calculators"
+import { getCalculatorNetworkItems } from "@/lib/calculator-network"
+import {
+  CalculatorContentDisclosure,
+  CalculatorEquation,
+  CalculatorTrustBlock,
+  CalculatorWorking,
+} from "@/components/calculator"
+import {
+  bsaFormulaDefinitions,
+  bsaFormulaOrder,
+  buildBsaWorking,
+  calculateBsaValue,
+  formatBsaNumber,
+  type BsaFormulaKey,
+} from "@/lib/bsa-formulas"
+import { feetAndInchesToCentimetres, poundsToKilograms } from "@/lib/measurement-conversions"
 
 import BSAClient from "./bsa-client"
 
 const CANONICAL_URL = "https://www.medmaths.com/calculator/body-composition/bsa"
-
-// Reviewed + updated (match ABW pill style)
-const REVIEWED_BY_NAME = "George Lambroglou"
-const REVIEWED_BY_CREDENTIALS = "RN"
-const LAST_UPDATED_ISO = "2026-06-21"
+const LAST_UPDATED_ISO = "2026-07-30"
+const LAST_UPDATED_HUMAN = "30 Jul 2026"
+const EXAMPLE_HEIGHT_CM = 170
+const EXAMPLE_WEIGHT_KG = 70
 
 export const metadata: Metadata = {
-  title: "BSA Calculator | Body Surface Area for Dosing",
-  description: "Calculate body surface area in m² for medication dosing using Mosteller, Du Bois, Haycock, and Gehan & George formulas.",
-  keywords: ["BSA calculator", "body surface area calculator", "BSA m2 calculator", "Mosteller BSA calculator", "Du Bois BSA calculator", "BSA for chemotherapy dosing", "bsa", "body surface area", "m2", "m²", "mosteller", "dubois"],
+  title: "BSA Calculator | Height, Weight & 4 Formulas",
+  description:
+    "Calculate body surface area in m² from metric or imperial height and weight. Compare Mosteller, Du Bois, Haycock and Gehan formulas with step-by-step working.",
+  keywords: [
+    "BSA calculator",
+    "body surface area calculator",
+    "BSA meaning",
+    "BSA definition",
+    "what does BSA mean",
+    "what does BSA result mean",
+    "BSA formula",
+    "how to calculate BSA",
+    "Mosteller formula",
+    "Mosteller BSA calculator",
+    "Du Bois BSA formula",
+    "Haycock BSA formula",
+    "Gehan and George formula",
+    "body surface area formula",
+    "BSA m2 calculator",
+    "BSA m² calculator",
+    "BSA calculator feet inches pounds",
+    "BSA calculator lb",
+    "BSA medication calculation",
+    "BSA for medication dosing",
+    "BSA for chemotherapy dosing",
+    "mg/m2 dose calculation",
+    "mg/m² dose calculation",
+  ],
   authors: [{ name: "George Lambroglou, RN", url: "https://www.medmaths.com/about" }],
   creator: "George Lambroglou, RN",
   publisher: "MedMaths",
-  alternates: { canonical: "https://www.medmaths.com/calculator/body-composition/bsa" },
+  alternates: { canonical: CANONICAL_URL },
   robots: {
     index: true,
     follow: true,
@@ -35,17 +75,19 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "BSA Calculator | Body Surface Area for Dosing",
-    description: "Calculate body surface area in m² for medication dosing using Mosteller, Du Bois, Haycock, and Gehan & George formulas.",
-    url: "https://www.medmaths.com/calculator/body-composition/bsa",
+    title: "BSA Calculator: Height, Weight & Four Formulas",
+    description:
+      "Calculate BSA in m² from metric or imperial height and weight, compare four formulas and see the arithmetic.",
+    url: CANONICAL_URL,
     siteName: "MedMaths",
     type: "website",
     locale: "en_AU",
   },
   twitter: {
     card: "summary",
-    title: "BSA Calculator | Body Surface Area for Dosing",
-    description: "Calculate body surface area in m² for medication dosing using Mosteller, Du Bois, Haycock, and Gehan & George formulas.",
+    title: "BSA Calculator | Height, Weight & 4 Formulas",
+    description:
+      "Calculate body surface area from metric or imperial height and weight and compare four published formulas.",
   },
 }
 
@@ -58,62 +100,109 @@ const breadcrumbs = [
 
 const faqItems = [
   {
-    question: "What is body surface area (BSA)?",
+    question: "What does BSA mean?",
     quickAnswer:
-      "Body surface area (BSA) estimates the total external surface area of the body and is expressed in square meters (m²).",
+      "BSA means body surface area. It is an estimate of the total outside surface area of a person's body and is expressed in square metres (m²).",
     details: [
-      "BSA is widely used in clinical dosing—especially chemotherapy regimens prescribed as mg/m².",
-      "It’s also used for physiological indexing (e.g., cardiac index = cardiac output ÷ BSA).",
-      "BSA is an estimate—different validated formulas can produce slightly different values.",
+      "A BSA calculator estimates this surface area from height and weight because direct measurement is not practical in routine care.",
+      "BSA is different from body weight, BMI and medication dose.",
+    ],
+  },
+  {
+    question: "What does a BSA result mean?",
+    quickAnswer:
+      "A BSA result such as 1.82 m² means the estimated body surface area is 1.82 square metres.",
+    details: [
+      "The number is not a medication dose by itself.",
+      "For an order written in mg/m², the prescribed dose per square metre must still be multiplied by the BSA.",
+    ],
+  },
+  {
+    question: "How is BSA calculated?",
+    quickAnswer:
+      "BSA is estimated from height and weight using a published equation such as Mosteller, Du Bois and Du Bois, Haycock, or Gehan and George.",
+    details: [
+      "Mosteller uses a square-root equation, while the other formulas use different constants and mathematical powers.",
+      "Use the exact equation specified by the relevant protocol or clinical reference.",
+    ],
+  },
+  {
+    question: "Can I calculate BSA using feet, inches and pounds?",
+    quickAnswer:
+      "Yes. Select imperial inputs and enter height in feet and inches and weight in pounds.",
+    details: [
+      "The calculator converts height to centimetres and weight to kilograms before applying the selected published equation.",
+      "The conversion steps and converted values are shown in the result working.",
     ],
   },
   {
     question: "Which BSA formula should I use?",
     quickAnswer:
-      "Mosteller is most common in day-to-day clinical use due to simplicity, but protocols may specify another formula.",
+      "Use the formula specified by the medication protocol, clinical reference or local policy.",
     details: [
-      "Mosteller: simple and widely used in many oncology workflows.",
-      "DuBois & DuBois: historically important and still referenced in some systems.",
-      "Haycock: commonly referenced in pediatric contexts.",
-      "Gehan & George: an alternative validated approach used in some tools.",
+      "The calculator offers four published equations so the arithmetic can match the required method.",
+      "Do not switch formulas merely because another method gives a preferred number.",
     ],
   },
   {
-    question: "Why do different BSA calculators give different results?",
+    question: "Why do BSA formulas give different results?",
     quickAnswer:
-      "Different formulas use different constants/exponents, and rounding at different steps can change the final value.",
+      "The formulas use different constants, mathematical powers and source datasets, so small differences are expected.",
     details: [
-      "Some calculators round inputs or outputs differently (e.g., BSA to 2 decimals), which can slightly shift results.",
-      "Differences are usually small, but oncology dose rounding or capped BSA rules can make them more meaningful.",
-      "Use the equation and rounding rules specified by your local protocol/pharmacy guidance.",
+      "Rounding height, weight or the final BSA at different stages can also change the displayed result.",
+      "Use one formula consistently and follow the formula and rounding rules named by the protocol.",
+    ],
+  },
+  {
+    question: "What does m² mean in a BSA result?",
+    quickAnswer: "m² means square metres, the unit used to report estimated body surface area.",
+    details: [
+      "The superscript 2 means area rather than length.",
+      "In an mg/m² prescription, the m² in the prescribed dose cancels with the patient's BSA unit, leaving a total dose in mg.",
+    ],
+  },
+  {
+    question: "How is BSA used in medication calculations?",
+    quickAnswer:
+      "For a dose written in mg/m², multiply the prescribed dose per square metre by the patient's BSA in square metres.",
+    details: [
+      "Example: 100 mg/m² × 1.82 m² = 182 mg.",
+      "The protocol may still require maximum-dose checks, organ-function adjustments, dose reductions and specific rounding.",
     ],
   },
   {
     question: "How is BSA used for chemotherapy dosing?",
     quickAnswer:
-      "Many chemotherapy regimens are prescribed as mg/m², so the total dose is calculated by multiplying the regimen dose by BSA.",
+      "Some chemotherapy regimens prescribe a medicine amount per square metre, written as mg/m², which is multiplied by the patient's BSA.",
     details: [
-      "Typical approach: Dose (mg) = regimen dose (mg/m²) × BSA (m²).",
-      "Protocols often include rounding rules and may include caps depending on the regimen.",
-      "Always follow your local protocol and pharmacist/oncologist direction—BSA is only one part of safe dosing.",
+      "BSA is only one part of the regimen calculation.",
+      "Treatment protocols may also specify dose caps, organ-function changes, toxicity reductions and pharmacy verification.",
+    ],
+  },
+  {
+    question: "Is there a normal BSA?",
+    quickAnswer:
+      "There is no single BSA value that should be assumed for medication dosing. BSA varies with the person's height and weight.",
+    details: [
+      "Use the patient's measured height and the weight method required by the protocol.",
+      "An example or standard BSA used in teaching is not a substitute for a patient-specific calculation.",
     ],
   },
   {
     question: "Is BSA the same as BMI?",
-    quickAnswer: "No. BMI is a weight-to-height ratio, while BSA estimates surface area in m².",
+    quickAnswer: "No. BMI is a weight-to-height ratio, while BSA estimates body surface area in square metres.",
     details: [
-      "BMI is used for weight classification and screening.",
-      "BSA is used for dosing and physiological indexing.",
-      "They measure different things and are not interchangeable.",
+      "The two calculations have different equations, units and purposes.",
+      "They should not be substituted for one another.",
     ],
   },
   {
-    question: "What units should I enter?",
-    quickAnswer: "Enter height in centimeters (cm) and weight in kilograms (kg) to calculate BSA in m².",
+    question: "Can this BSA calculator be used for children?",
+    quickAnswer:
+      "The calculator can show the arithmetic for the available formulas, but paediatric dosing must follow the relevant paediatric protocol.",
     details: [
-      "If you have pounds or inches/feet, convert first (or use a calculator with unit toggles).",
-      "Unit errors can significantly change BSA and dosing outputs.",
-      "If dosing medication, double-check units and follow local protocol.",
+      "The Haycock publication validated its height-weight formula across infants, children and adults.",
+      "That does not mean every paediatric medicine should use Haycock or BSA-based dosing.",
     ],
   },
 ]
@@ -122,37 +211,48 @@ type PracticeItem = {
   title: string
   prompt: string
   answerLine: string
-  working: string
+  working: string[]
 }
+
+const IMPERIAL_EXAMPLE_HEIGHT_CM = feetAndInchesToCentimetres(5, 7)
+const IMPERIAL_EXAMPLE_WEIGHT_KG = poundsToKilograms(154)
 
 const practiceItems: PracticeItem[] = [
   {
-    title: "Practice 1",
-    prompt: "Height 170 cm, weight 70 kg. What is BSA (Mosteller)?",
-    answerLine: "Answer: 1.82 m²",
-    working: `BSA = √[(Height × Weight) / 3600]
-BSA = √[(170 × 70) / 3600]
-BSA = √(11900 / 3600)
-BSA = √3.305556
-BSA = 1.82 m²`,
+    title: "Mosteller metric practice",
+    prompt: "Height 170 cm and weight 70 kg. Calculate BSA using Mosteller.",
+    answerLine: "Displayed to two decimal places: 1.82 m²",
+    working: buildBsaWorking(170, 70, "mosteller"),
   },
   {
-    title: "Practice 2",
-    prompt: "Height 165 cm, weight 95 kg. What is BSA (Mosteller)?",
-    answerLine: "Answer: 2.09 m²",
-    working: `BSA = √[(165 × 95) / 3600]
-BSA = √(15675 / 3600)
-BSA = √4.354167
-BSA = 2.09 m²`,
+    title: "Mosteller imperial practice",
+    prompt: "Height 5 ft 7 in and weight 154 lb. Convert the measurements and calculate BSA using Mosteller.",
+    answerLine: `Displayed to two decimal places: ${formatBsaNumber(calculateBsaValue(IMPERIAL_EXAMPLE_HEIGHT_CM, IMPERIAL_EXAMPLE_WEIGHT_KG, "mosteller"), 2)} m²`,
+    working: [
+      `Height = (5 × 30.48) + (7 × 2.54) = ${formatBsaNumber(IMPERIAL_EXAMPLE_HEIGHT_CM, 2)} cm`,
+      `Weight = 154 × 0.45359237 = ${formatBsaNumber(IMPERIAL_EXAMPLE_WEIGHT_KG, 2)} kg`,
+      ...buildBsaWorking(IMPERIAL_EXAMPLE_HEIGHT_CM, IMPERIAL_EXAMPLE_WEIGHT_KG, "mosteller"),
+    ],
   },
   {
-    title: "Practice 3",
-    prompt: "Height 110 cm, weight 18 kg. What is BSA (Mosteller)?",
-    answerLine: "Answer: 0.74 m²",
-    working: `BSA = √[(110 × 18) / 3600]
-BSA = √(1980 / 3600)
-BSA = √0.55
-BSA = 0.74 m²`,
+    title: "Formula comparison practice",
+    prompt: "Height 170 cm and weight 70 kg. Compare the displayed BSA using Mosteller and Haycock.",
+    answerLine: "Mosteller: 1.82 m². Haycock: 1.83 m².",
+    working: [
+      ...buildBsaWorking(170, 70, "mosteller"),
+      ...buildBsaWorking(170, 70, "haycock"),
+    ],
+  },
+  {
+    title: "Medication calculation practice",
+    prompt: "A hypothetical order is 100 mg/m² and the calculated BSA is 1.82 m². Calculate the total amount before protocol-specific rounding.",
+    answerLine: "Arithmetic result: 182 mg",
+    working: [
+      "Total amount (mg) = prescribed amount (mg/m²) × BSA (m²)",
+      "Total amount = 100 mg/m² × 1.82 m²",
+      "The m² units cancel, leaving mg",
+      "Total amount = 182 mg",
+    ],
   },
 ]
 
@@ -160,11 +260,11 @@ function jsonLdBreadcrumbList() {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: breadcrumbs.map((b, idx) => ({
+    itemListElement: breadcrumbs.map((breadcrumb, index) => ({
       "@type": "ListItem",
-      position: idx + 1,
-      name: b.name,
-      item: `https://www.medmaths.com${b.href}`,
+      position: index + 1,
+      name: breadcrumb.name,
+      item: `https://www.medmaths.com${breadcrumb.href}`,
     })),
   }
 }
@@ -173,10 +273,13 @@ function jsonLdFAQPage() {
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: faqItems.map((f) => ({
+    mainEntity: faqItems.map((item) => ({
       "@type": "Question",
-      name: f.question,
-      acceptedAnswer: { "@type": "Answer", text: f.quickAnswer },
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: `${item.quickAnswer} ${item.details.join(" ")}`,
+      },
     })),
   }
 }
@@ -185,12 +288,23 @@ function jsonLdWebApplication() {
   return {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    name: "Body Surface Area (BSA) Calculator",
+    name: "BSA Calculator",
+    alternateName: "Body Surface Area Calculator",
     description:
-      "Calculate Body Surface Area (BSA) using Mosteller, DuBois, Haycock, or Gehan & George formulas. Includes clinical context, worked examples, practice questions, FAQs, and references.",
+      "Calculate body surface area from metric or imperial height and weight using Mosteller, Du Bois and Du Bois, Haycock, or Gehan and George. Includes conversions, formula comparison and step-by-step arithmetic.",
     url: CANONICAL_URL,
     applicationCategory: "HealthApplication",
     operatingSystem: "All",
+    author: {
+      "@type": "Person",
+      name: "George Lambroglou, RN",
+      url: "https://www.medmaths.com/about",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "MedMaths",
+      url: "https://www.medmaths.com",
+    },
   }
 }
 
@@ -215,77 +329,119 @@ function ExternalLinkIcon() {
 type RefItem = {
   title: string
   badge: string
-  org: string
+  organisation: string
   description: string
   href: string
 }
 
 const referenceGroups: Array<{ heading: string; items: RefItem[] }> = [
   {
-    heading: "Key publications (original formula sources)",
+    heading: "Original formula publications",
     items: [
       {
-        title: "Mosteller RD — Simplified calculation of body-surface area",
+        title: bsaFormulaDefinitions.mosteller.sourceTitle,
         badge: "PubMed",
-        org: "N Engl J Med (1987)",
-        description: "Classic simplified formula widely adopted in clinical calculators and dosing workflows.",
-        href: "https://pubmed.ncbi.nlm.nih.gov/3657876/",
+        organisation: "New England Journal of Medicine (1987)",
+        description: "Original publication of the simplified Mosteller body-surface-area calculation.",
+        href: bsaFormulaDefinitions.mosteller.sourceUrl,
       },
       {
-        title: "Du Bois D & Du Bois EF — A formula to estimate surface area from height and weight",
-        badge: "Journal",
-        org: "Arch Intern Med (1916)",
-        description: "Historic BSA equation still referenced by many systems and tools.",
-        href: "https://jamanetwork.com/journals/jamainternalmedicine/article-abstract/546302",
+        title: bsaFormulaDefinitions.dubois.sourceTitle,
+        badge: "Original article",
+        organisation: "Archives of Internal Medicine (1916)",
+        description: "Original Du Bois and Du Bois height-weight surface-area equation.",
+        href: bsaFormulaDefinitions.dubois.sourceUrl,
       },
       {
-        title: "Haycock GB, Schwartz GJ, Wisotsky DH — Height–weight formula validated across ages",
+        title: bsaFormulaDefinitions.haycock.sourceTitle,
         badge: "PubMed",
-        org: "J Pediatr (1978)",
-        description: "Validated BSA equation commonly referenced in pediatric and general contexts.",
-        href: "https://pubmed.ncbi.nlm.nih.gov/650346/",
+        organisation: "Journal of Pediatrics (1978)",
+        description: "Original Haycock height-weight equation validated in infants, children and adults.",
+        href: bsaFormulaDefinitions.haycock.sourceUrl,
       },
       {
-        title: "Gehan EA, George SL — Estimation of human body surface area from height and weight",
-        badge: "Summary",
-        org: "Cancer Chemother Rep (1970)",
-        description: "Alternative validated BSA approach used in some calculators.",
-        href: "https://www.semanticscholar.org/paper/Estimation-of-human-body-surface-area-from-height-Gehan-George/9318ca32d1628c19d2f4f20db74b118b001b041e",
+        title: bsaFormulaDefinitions.gehan.sourceTitle,
+        badge: "PubMed",
+        organisation: "Cancer Chemotherapy Reports (1970)",
+        description: "Original Gehan and George publication estimating body surface area from height and weight.",
+        href: bsaFormulaDefinitions.gehan.sourceUrl,
       },
     ],
   },
   {
-    heading: "Clinical tools & protocol-style resources",
+    heading: "Clinical context",
     items: [
       {
-        title: "eviQ — Body Surface Area (BSA) calculator",
-        badge: "Protocol",
-        org: "eviQ (Cancer Institute NSW)",
-        description: "Protocol-style calculator resource with references and version history (widely used in AU oncology).",
+        title: "eviQ — Body Surface Area Calculator",
+        badge: "Australian oncology",
+        organisation: "Cancer Institute NSW / eviQ",
+        description: "Australian clinical calculator and formula-reference page for body surface area.",
         href: "https://www.eviq.org.au/clinical-resources/eviq-calculators/3198-body-surface-area-calculator",
       },
       {
-        title: "Medscape — Body Surface Area Based Dosing",
-        badge: "Clinical",
-        org: "Medscape / QxMD tool",
-        description: "Clinical tool summary for BSA-based dosing (commonly cites Mosteller).",
-        href: "https://reference.medscape.com/calculator/692/body-surface-area-based-dosing",
-      },
-      {
-        title: "Calculator.net — Body Surface Area Calculator",
-        badge: "Reference",
-        org: "Calculator.net",
-        description: "Example of how common tools present multiple BSA formulas and background context.",
-        href: "https://www.calculator.net/body-surface-area-calculator.html",
+        title: "StatPearls — Body Surface Area",
+        badge: "Clinical overview",
+        organisation: "NCBI Bookshelf",
+        description: "Overview of BSA equations, clinical applications and limitations.",
+        href: "https://www.ncbi.nlm.nih.gov/books/NBK559005/",
       },
     ],
   },
 ]
 
+function FormulaExplanation({ formulaKey }: { formulaKey: BsaFormulaKey }) {
+  const formula = bsaFormulaDefinitions[formulaKey]
+  const result = calculateBsaValue(EXAMPLE_HEIGHT_CM, EXAMPLE_WEIGHT_KG, formulaKey)
+  const anchorIds: Record<BsaFormulaKey, string> = {
+    mosteller: "mosteller-bsa-formula",
+    dubois: "du-bois-bsa-formula",
+    haycock: "haycock-bsa-formula",
+    gehan: "gehan-george-bsa-formula",
+  }
+
+  return (
+    <article id={anchorIds[formulaKey]} className="scroll-mt-24 space-y-4 rounded-2xl border border-emerald-200 bg-white p-4 sm:p-5">
+      <CalculatorEquation
+        title={formula.heading}
+        equation={formula.equation}
+        spokenEquation={formula.spokenEquation}
+        plainEnglish={formula.plainEnglish}
+        variables={[
+          { symbol: "BSA", meaning: "body surface area in square metres (m²)" },
+          { symbol: "height", meaning: "height in centimetres (cm)" },
+          { symbol: "weight", meaning: "weight in kilograms (kg)" },
+        ]}
+        theme="body"
+        headingLevel="h3"
+        className="border-0 p-0"
+      />
+
+      <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+        <h4 className="font-semibold text-gray-950">How this formula differs</h4>
+        <p className="mt-2 text-sm leading-6 text-gray-700">{formula.difference}</p>
+      </div>
+
+      <CalculatorWorking
+        title={`Worked example: ${EXAMPLE_HEIGHT_CM} cm and ${EXAMPLE_WEIGHT_KG} kg`}
+        lines={buildBsaWorking(EXAMPLE_HEIGHT_CM, EXAMPLE_WEIGHT_KG, formulaKey)}
+      />
+
+      <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-950">
+        Result: {formatBsaNumber(result, 4)} m². Displayed to two decimal places: {formatBsaNumber(result, 2)} m².
+      </p>
+    </article>
+  )
+}
+
 export default function Page() {
+  const comparisonRows = bsaFormulaOrder.map((key) => ({
+    key,
+    name: bsaFormulaDefinitions[key].name,
+    result: calculateBsaValue(EXAMPLE_HEIGHT_CM, EXAMPLE_WEIGHT_KG, key),
+  }))
+
   return (
     <>
-      {/* JSON-LD (MANDATORY) */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumbList()) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdFAQPage()) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebApplication()) }} />
@@ -294,359 +450,267 @@ export default function Page() {
 
       <main className="min-h-screen bg-white">
         <div className="mx-auto max-w-3xl px-4 pb-12 pt-4 sm:px-6 sm:py-12 lg:px-8 lg:pt-10">
-          {/* Breadcrumbs */}
-          <nav className="mb-4 hidden text-sm text-gray-500 sm:block">
-            <Link href="/" className="hover:text-gray-700">
-              Home
-            </Link>
-            {" / "}
-            <Link href="/calculators" className="hover:text-gray-700">
-              Calculators
-            </Link>
-            {" / "}
-            <Link href="/calculator/body-composition" className="hover:text-gray-700">
-              Body Composition
-            </Link>
-            {" / "}
-            <span className="text-gray-900">Body Surface Area (BSA)</span>
+          <nav aria-label="Breadcrumb" className="mb-4 hidden text-sm text-gray-600 sm:block">
+            <ol className="flex flex-wrap items-center gap-2">
+              {breadcrumbs.map((breadcrumb, index) => {
+                const isLast = index === breadcrumbs.length - 1
+                return (
+                  <li key={breadcrumb.href} className="flex items-center gap-2">
+                    {index > 0 && <span className="text-gray-300">/</span>}
+                    {isLast ? (
+                      <span className="font-medium text-gray-900">{breadcrumb.name}</span>
+                    ) : (
+                      <Link href={breadcrumb.href} className="hover:text-emerald-700">
+                        {breadcrumb.name}
+                      </Link>
+                    )}
+                  </li>
+                )
+              })}
+            </ol>
           </nav>
 
-          <h1 className="mb-2 text-3xl font-bold sm:text-4xl tracking-tight text-gray-900 text-center">
-            Body Surface Area (BSA) Calculator
+          <h1 className="mb-3 text-center text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            BSA Calculator — Body Surface Area from Height and Weight
           </h1>
 
-          {/* Calculator */}
-          <section id="calculator" className="calculator-tool mb-8 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-8">
+          <section id="calculator" className="mb-8 scroll-mt-24">
             <BSAClient />
           </section>
 
-          {/* Reviewed pills (match ABW style) */}
-          <div className="mb-4 flex flex-wrap justify-center gap-2">
-            <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-700 shadow-sm">
-              Reviewed by {REVIEWED_BY_NAME}, {REVIEWED_BY_CREDENTIALS}
-            </span>
-            <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-700 shadow-sm">
-              Last updated {LAST_UPDATED_ISO}
-            </span>
-          </div>
-
-          <p className="mb-8 text-lg text-gray-600 text-center">
-            Calculate BSA using common clinical formulas (Mosteller, DuBois, Haycock, Gehan &amp; George) with clear
-            working, dosing context, practice questions, FAQs, and references.
-          </p>
-
-          <div className="mb-8 flex flex-wrap gap-3 justify-center">
-            <span className="text-sm text-gray-600">Jump to:</span>
-            <a href="#calculator" className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
-              Calculator
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#how-it-works" className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
-              How it works
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#formula" className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
-              Formula
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#examples" className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
-              Examples
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#practice-questions" className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
-              Practice questions
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#clinical-notes" className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
-              Clinical notes
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#faqs" className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
-              FAQs
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#references" className="text-emerald-600 hover:text-emerald-700 font-medium text-sm">
-              References
-            </a>
-          </div>
-
-
-          <section id="how-it-works" className="mb-12">
-            <h2 className="mb-4 text-2xl font-bold text-gray-900 text-center">How it works</h2>
-            <div className="space-y-4 text-gray-600 leading-relaxed">
-              <p>
-                Body Surface Area (BSA) is an estimate of the body’s external surface area and is expressed in square
-                meters (m²). In healthcare, BSA is frequently used to scale doses—especially chemotherapy regimens
-                prescribed as <span className="font-semibold text-gray-700">mg/m²</span>—and to index certain
-                physiological measurements (for example, cardiac index).
-              </p>
-
-              <p>
-                Because directly measuring surface area is impractical, BSA is calculated from height and weight using
-                validated equations. Different formulas were derived from different datasets and methods, so outputs can
-                vary slightly. Those differences are usually small, but they can matter when protocols include dose
-                rounding rules or BSA caps—so always follow your local protocol.
-              </p>
-
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
-                <p className="font-semibold text-gray-900 mb-2">Common clinical uses</p>
-                <ul className="list-disc pl-5 space-y-1">
-                  <li>Chemotherapy dosing (mg/m² → mg)</li>
-                  <li>Indexing cardiac output (cardiac index)</li>
-                  <li>Some high-risk or narrow-therapeutic medications (protocol dependent)</li>
-                  <li>Research/physiology calculations where body size scaling is needed</li>
-                </ul>
-              </div>
-            </div>
-          </section>
-
-          <section id="formula" className="mb-12">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">Formula</h2>
-
-            <div className="space-y-4">
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-700">
-                <div className="font-semibold text-gray-800 mb-2">Mosteller (commonly used)</div>
-                <div>BSA (m²) = √[(Height (cm) × Weight (kg)) / 3600]</div>
-              </div>
-
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-700">
-                <div className="font-semibold text-gray-800 mb-2">DuBois &amp; DuBois (historic)</div>
-                <div>BSA (m²) = 0.007184 × Height(cm)^0.725 × Weight(kg)^0.425</div>
-              </div>
-
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-700">
-                <div className="font-semibold text-gray-800 mb-2">Haycock (often referenced in pediatrics)</div>
-                <div>BSA (m²) = 0.024265 × Height(cm)^0.3964 × Weight(kg)^0.5378</div>
-              </div>
-
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-700">
-                <div className="font-semibold text-gray-800 mb-2">Gehan &amp; George (alternative validated)</div>
-                <div>BSA (m²) = 0.0235 × Height(cm)^0.42246 × Weight(kg)^0.51456</div>
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-lg border border-gray-200 bg-white p-5">
-              <p className="font-semibold text-gray-900 mb-2">How to apply BSA to a prescribed dose (mg/m²)</p>
-              <p className="text-gray-600">
-                If a regimen dose is prescribed as <span className="font-semibold text-gray-700">mg/m²</span>, the total
-                dose is typically calculated as:
-              </p>
-              <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-700">
-                <div>Total dose (mg) = regimen dose (mg/m²) × BSA (m²)</div>
-              </div>
-              <p className="mt-3 text-gray-600">
-                After calculation, protocols often apply rounding rules (e.g., vial sizes) and may include additional
-                clinical constraints (renal/hepatic function, intent of treatment, toxicity history).
-              </p>
-            </div>
-          </section>
-
-          {/* Worked examples (keep ABW-style emerald scheme; do not change layout) */}
-          <section id="examples" className="mb-12">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">Worked examples</h2>
-
-            <div className="mt-4 space-y-6">
-              <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm border-l-4 border-emerald-500">
-                <p className="font-medium text-gray-900">Example 1 (Mosteller): Height 170 cm, weight 70 kg</p>
-                <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-900">
-                  <div>BSA = √[(170 × 70) / 3600]</div>
-                  <div>BSA = √[11900 / 3600]</div>
-                  <div>BSA = √3.305556</div>
-                  <div>BSA = 1.82 m²</div>
-                </div>
-                <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-                  <p className="text-sm font-semibold text-emerald-900">Answer: 1.82 m²</p>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm border-l-4 border-emerald-500">
-                <p className="font-medium text-gray-900">Example 2 (Mosteller): Height 160 cm, weight 55 kg</p>
-                <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-900">
-                  <div>BSA = √[(160 × 55) / 3600]</div>
-                  <div>BSA = √[8800 / 3600]</div>
-                  <div>BSA = √2.444444</div>
-                  <div>BSA = 1.56 m²</div>
-                </div>
-                <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-                  <p className="text-sm font-semibold text-emerald-900">Answer: 1.56 m²</p>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm border-l-4 border-emerald-500">
-                <p className="font-medium text-gray-900">Example 3 (DuBois): Height 180 cm, weight 90 kg</p>
-                <div className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-900">
-                  <div>BSA = 0.007184 × 180^0.725 × 90^0.425</div>
-                  <div>BSA ≈ 2.11 m²</div>
-                </div>
-                <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-                  <p className="text-sm font-semibold text-emerald-900">Answer: 2.11 m²</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Practice questions (match ABW layout + button wording) */}
-          <section id="practice-questions" className="mb-12">
-            <h2 className="text-xl font-semibold text-gray-900">Practice questions</h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Designed for student nurses, junior doctors, and pharmacists who want to verify their steps.
-              <br />
-              Try it first, then reveal the answer and working.
+          <section id="bsa-meaning" className="mb-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 sm:p-6">
+            <h2 className="text-2xl font-bold text-gray-950">What does BSA mean?</h2>
+            <p className="mt-3 text-base leading-7 text-gray-800">
+              <strong>BSA means body surface area.</strong> It is an estimate of the total outside surface area of a person's body. BSA is usually expressed in square metres, written as <strong>m²</strong>.
             </p>
 
-            <div className="mt-6 space-y-5">
-              {practiceItems.map((q) => (
-                <div key={q.title} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                  <p className="text-sm font-semibold text-gray-900">
-                    {q.title}: {q.prompt}
-                  </p>
+            <h3 className="mt-6 text-lg font-bold text-gray-950">What is the definition of body surface area?</h3>
+            <p className="mt-2 text-sm leading-6 text-gray-700">
+              Body surface area is the estimated external area of the body. A BSA calculator uses height and weight to estimate this area because direct measurement is not practical in routine clinical care.
+            </p>
 
-                  <details className="mt-4">
-                    <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-                      <span className="inline-flex items-center rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700">
-                        Show answer + working
-                      </span>
-                    </summary>
+            <h3 className="mt-6 text-lg font-bold text-gray-950">What does a BSA result mean?</h3>
+            <p className="mt-2 text-sm leading-6 text-gray-700">
+              A result of 1.82 m² means the person's estimated body surface area is 1.82 square metres. It is not the person's weight, BMI, medication dose or medicine volume.
+            </p>
+          </section>
 
-                    <div className="mt-4 space-y-3">
-                      <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-                        <p className="text-sm font-semibold text-emerald-900">{q.answerLine}</p>
-                      </div>
+          <section className="mb-8 rounded-2xl border border-yellow-200 bg-yellow-50 p-5 sm:p-6">
+            <h2 className="text-xl font-bold text-yellow-950">A BSA result is not the final medication dose</h2>
+            <p className="mt-2 text-sm leading-6 text-yellow-950">
+              If an order is written in mg/m², the prescribed amount per square metre must still be multiplied by the BSA. The relevant protocol may then require maximum-dose checks, organ-function adjustments, dose reductions, independent verification and specific rounding.
+            </p>
+          </section>
 
-                      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-900 whitespace-pre-wrap">
-                        {q.working}
-                      </div>
-                    </div>
-                  </details>
-                </div>
+          <section id="how-bsa-is-calculated" className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-950">How is BSA calculated?</h2>
+            <p className="mt-3 text-base leading-7 text-gray-700">
+              BSA is estimated from height and weight using a published mathematical equation. The Mosteller formula uses a square root. Du Bois and Du Bois, Haycock, and Gehan and George use different constants and mathematical powers, so the same measurements can produce slightly different results.
+            </p>
+
+            <CalculatorEquation
+              title="Mosteller BSA formula"
+              equation={bsaFormulaDefinitions.mosteller.equation}
+              spokenEquation={bsaFormulaDefinitions.mosteller.spokenEquation}
+              plainEnglish={bsaFormulaDefinitions.mosteller.plainEnglish}
+              variables={[
+                { symbol: "BSA", meaning: "body surface area in square metres (m²)" },
+                { symbol: "height", meaning: "height in centimetres (cm)" },
+                { symbol: "weight", meaning: "weight in kilograms (kg)" },
+              ]}
+              theme="body"
+              id="mosteller-formula-summary"
+              headingLevel="h3"
+              className="mt-5"
+            />
+          </section>
+
+          <CalculatorContentDisclosure
+            id="all-bsa-formulas"
+            title="All four BSA formulas explained"
+            summary="See each equation, what its symbols mean, how it differs and the complete arithmetic for the same height and weight."
+            theme="body"
+          >
+            <div className="space-y-5">
+              {bsaFormulaOrder.map((formulaKey) => (
+                <FormulaExplanation key={formulaKey} formulaKey={formulaKey} />
               ))}
             </div>
-          </section>
+          </CalculatorContentDisclosure>
 
-          <section id="clinical-notes" className="mb-12">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">Clinical notes</h2>
+          <section id="why-bsa-results-differ" className="mb-8 rounded-2xl border border-gray-200 bg-gray-50 p-5 sm:p-6">
+            <h2 className="text-2xl font-bold text-gray-950">Why can BSA calculations give different results?</h2>
+            <p className="mt-3 text-sm leading-6 text-gray-700">
+              The equations apply height and weight differently. They use different constants, powers and source datasets. Differences can also occur when height, weight or the final result is rounded at a different stage.
+            </p>
 
-            <div className="space-y-6 text-gray-600 leading-relaxed">
-              <div className="rounded-lg border border-gray-200 bg-white p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Dose rounding and capped BSA</h3>
-                <p>
-                  Many chemotherapy protocols include dose rounding (e.g., vial-size practicality) and may include rules
-                  for capped BSA in selected regimens. These policies are protocol-specific and vary by institution, drug,
-                  and treatment intent.
-                </p>
-                <p className="mt-3">
-                  If you are calculating chemotherapy doses, use your local regimen reference and pharmacist guidance for
-                  rounding thresholds, maximum doses, capped BSA rules, and adjustments for toxicity or organ function.
-                </p>
-              </div>
-
-              <div className="rounded-lg border border-gray-200 bg-white p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Obesity and dosing considerations</h3>
-                <p>
-                  BSA-based dosing in obesity can be complex and may involve protocol-specific guidance, clinical
-                  judgement, and pharmacist oversight. Some regimens specify full weight-based BSA, while others define
-                  alternative approaches depending on the drug and indication.
-                </p>
-                <p className="mt-3">
-                  Don’t substitute IBW/AdjBW into a BSA equation unless your protocol explicitly directs you to do so.
-                </p>
-              </div>
-
-              <div className="rounded-lg border border-gray-200 bg-white p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Pediatrics</h3>
-                <p>
-                  Some formulas (e.g., Haycock) are frequently cited in pediatric contexts, but the correct approach
-                  depends on your pediatric oncology or pharmacy protocol. Always use the regimen’s specified method and
-                  rounding policy.
-                </p>
-              </div>
+            <div className="mt-5 overflow-hidden rounded-xl border border-gray-200 bg-white">
+              <table className="w-full text-left text-sm">
+                <caption className="border-b border-gray-200 bg-white px-4 py-3 text-left font-semibold text-gray-950">
+                  Example comparison using 170 cm and 70 kg
+                </caption>
+                <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
+                  <tr>
+                    <th scope="col" className="px-4 py-2 font-semibold">Formula</th>
+                    <th scope="col" className="px-4 py-2 text-right font-semibold">Exact estimate</th>
+                    <th scope="col" className="px-4 py-2 text-right font-semibold">Two decimals</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {comparisonRows.map((row) => (
+                    <tr key={row.key}>
+                      <th scope="row" className="px-4 py-3 font-medium text-gray-900">{row.name}</th>
+                      <td className="px-4 py-3 text-right font-mono text-gray-700">{formatBsaNumber(row.result, 4)} m²</td>
+                      <td className="px-4 py-3 text-right font-semibold text-emerald-800">{formatBsaNumber(row.result, 2)} m²</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </section>
 
-          <section className="mb-12 rounded-lg border border-yellow-200 bg-yellow-50 p-6">
-            <p className="text-sm text-gray-800">
-              <span className="font-semibold">Clinical safety note:</span> BSA is an estimate used in dosing and indexing.
-              If you are using BSA to calculate medication doses (especially chemotherapy), always follow your local
-              protocol for the required formula, rounding rules, and any caps or dose limits. Confirm units and seek
-              pharmacist/oncologist guidance when unsure.
+            <p className="mt-4 text-sm font-medium leading-6 text-gray-900">
+              Use the formula specified by the medication protocol, clinical reference or local policy. Do not change formulas merely to obtain a preferred result.
             </p>
           </section>
 
-          <section className="mb-12">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">Related calculators</h2>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Link
-                href="/calculator/body-composition/ideal-body-weight"
-                className="rounded-lg border border-gray-200 bg-white p-4 hover:border-emerald-300 hover:bg-emerald-50 transition-colors"
-              >
-                <p className="font-medium text-gray-900 hover:text-emerald-600">Ideal Body Weight (IBW)</p>
-                <p className="text-xs text-gray-500 mt-1">Height-based dosing weight support</p>
-              </Link>
+          <section id="bsa-medication-calculation" className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-950">How is BSA used in medication calculations?</h2>
+            <p className="mt-3 text-base leading-7 text-gray-700">
+              When a prescribed amount is written as milligrams per square metre, multiply the prescribed amount by the patient's BSA.
+            </p>
 
-              <Link
-                href="/calculator/renal-function/creatinine-clearance"
-                className="rounded-lg border border-gray-200 bg-white p-4 hover:border-emerald-300 hover:bg-emerald-50 transition-colors"
-              >
-                <p className="font-medium text-gray-900 hover:text-emerald-600">Creatinine Clearance</p>
-                <p className="text-xs text-gray-500 mt-1">Renal dosing support</p>
-              </Link>
+            <CalculatorEquation
+              title="BSA-based medication calculation"
+              equation="Total amount (mg) = prescribed amount (mg/m²) × BSA (m²)"
+              spokenEquation="Total amount in milligrams equals the prescribed amount in milligrams per square metre multiplied by body surface area in square metres."
+              plainEnglish="Multiply the medicine amount prescribed for each square metre by the patient's calculated body surface area."
+              variables={[
+                { symbol: "mg/m²", meaning: "milligrams prescribed for each square metre" },
+                { symbol: "BSA", meaning: "the patient's calculated body surface area in m²" },
+                { symbol: "mg", meaning: "the resulting total medicine amount before protocol-specific adjustments" },
+              ]}
+              theme="body"
+              headingLevel="h3"
+              className="mt-5"
+            />
 
-              <Link
-                href="/calculator/dose-calculations/mgkg-to-ml-dose"
-                className="rounded-lg border border-gray-200 bg-white p-4 hover:border-emerald-300 hover:bg-emerald-50 transition-colors"
-              >
-                <p className="font-medium text-gray-900 hover:text-emerald-600">mg/kg to mL Dose</p>
-                <p className="text-xs text-gray-500 mt-1">Weight-based liquid dosing</p>
-              </Link>
+            <CalculatorWorking
+              title="Worked arithmetic example"
+              className="mt-4"
+              lines={[
+                "Prescribed amount = 100 mg/m²",
+                "BSA = 1.82 m²",
+                "Total amount = 100 mg/m² × 1.82 m²",
+                "The m² units cancel, leaving mg",
+                "Total amount = 182 mg",
+              ]}
+            />
+
+            <p className="mt-4 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm leading-6 text-yellow-950">
+              This example demonstrates arithmetic only. It does not select a medicine, regimen, dose, dose cap, organ-function adjustment or final rounding method.
+            </p>
+          </section>
+
+          <CalculatorContentDisclosure
+            id="practice-questions"
+            title="BSA practice questions with working"
+            summary="Practise each formula and a simple mg/m² multiplication example."
+            theme="body"
+          >
+            <div className="space-y-3">
+              {practiceItems.map((item) => (
+                <details key={item.title} className="rounded-xl border border-gray-200 bg-white p-4">
+                  <summary className="cursor-pointer font-semibold text-gray-950">
+                    {item.title}: {item.prompt}
+                  </summary>
+                  <div className="mt-4 space-y-3">
+                    <CalculatorWorking lines={item.working} />
+                    <p className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-950">
+                      {item.answerLine}
+                    </p>
+                  </div>
+                </details>
+              ))}
             </div>
-          </section>
+          </CalculatorContentDisclosure>
 
-          <section id="faqs" className="mb-12">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">Frequently asked questions</h2>
-            <FAQAccordion items={faqItems} />
-          </section>
+          <CalculatorContentDisclosure
+            id="faqs"
+            title="BSA meaning, formulas and result FAQ"
+            summary="Direct answers to common body surface area searches and calculation questions."
+            theme="body"
+            className="mb-10"
+          >
+            <div className="space-y-3">
+              {faqItems.map((item) => (
+                <details key={item.question} className="rounded-xl border border-gray-200 bg-white p-4">
+                  <summary className="cursor-pointer font-semibold text-gray-950">{item.question}</summary>
+                  <div className="mt-3 space-y-3 text-sm leading-6 text-gray-700">
+                    <p className="font-medium text-gray-950">{item.quickAnswer}</p>
+                    <ul className="list-disc space-y-1 pl-5">
+                      {item.details.map((detail) => (
+                        <li key={detail}>{detail}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </details>
+              ))}
+            </div>
+          </CalculatorContentDisclosure>
 
-          <section id="references" className="mb-12">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">References &amp; Sources</h2>
+          <RelatedCalculators
+            theme="body"
+            title="Related body-size and dosing calculators"
+            description="Use these tools when body surface area connects to dosing weight, renal function, liquid dosing, or dilution calculations."
+            items={getCalculatorNetworkItems("/calculator/body-composition/bsa")}
+          />
 
-            <div className="space-y-8">
+          <CalculatorTrustBlock
+            theme="body"
+            author={{ name: "George Lambroglou", credentials: "RN", href: "/about" }}
+            lastReviewed={{ iso: LAST_UPDATED_ISO, label: LAST_UPDATED_HUMAN }}
+            note="This calculator estimates body surface area from height and weight. It does not select a medicine regimen, formula, dosing weight, dose cap or rounding rule."
+            className="mb-10"
+          />
+
+          <details id="references" className="group mb-10 scroll-mt-24 overflow-hidden rounded-2xl border border-gray-200 bg-gray-50">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 text-xl font-bold text-gray-900 [&::-webkit-details-marker]:hidden">
+              References and formula sources
+              <span className="text-sm font-medium text-emerald-700 group-open:hidden">Show</span>
+              <span className="hidden text-sm font-medium text-emerald-700 group-open:inline">Hide</span>
+            </summary>
+            <div className="space-y-8 border-t border-gray-200 p-5">
               {referenceGroups.map((group) => (
                 <div key={group.heading}>
-                  <h3 className="mb-4 text-lg font-semibold text-gray-900">{group.heading}</h3>
-
-                  <div className="space-y-4">
-                    {group.items.map((r) => (
+                  <h3 className="text-sm font-semibold text-gray-700">{group.heading}</h3>
+                  <div className="mt-3 space-y-3">
+                    {group.items.map((reference) => (
                       <a
-                        key={r.href}
-                        href={r.href}
+                        key={reference.href}
+                        href={reference.href}
                         target="_blank"
-                        rel="noopener noreferrer"
-                        className="group flex items-start justify-between gap-4 rounded-lg border border-gray-200 bg-white p-4 hover:border-emerald-300 hover:bg-emerald-50 transition-colors"
+                        rel="noreferrer"
+                        className="group flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50"
                       >
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <h4 className="font-semibold text-gray-900 group-hover:text-emerald-600">{r.title}</h4>
-                            <span className="inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs text-gray-700">
-                              {r.badge}
-                            </span>
+                            <p className="font-medium text-gray-900 transition group-hover:text-emerald-700">{reference.title}</p>
+                            <span className="rounded-md border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs text-gray-700">{reference.badge}</span>
                           </div>
-                          <p className="mt-1 text-sm text-gray-600">{r.org}</p>
-                          <p className="mt-2 text-sm text-gray-700">{r.description}</p>
+                          <p className="mt-1 text-sm text-gray-600">{reference.organisation}</p>
+                          <p className="mt-1 text-sm leading-6 text-gray-700">{reference.description}</p>
                         </div>
-
                         <ExternalLinkIcon />
                       </a>
                     ))}
                   </div>
                 </div>
               ))}
+              <p className="text-sm text-gray-600">
+                References are provided for education and transparency. For clinical dosing, follow the medication order, regimen, local protocol and pharmacist or specialist guidance.
+              </p>
             </div>
-
-            <p className="mt-6 text-sm text-gray-600">
-              References are provided for education and transparency. For clinical dosing decisions—especially
-              chemotherapy—always follow your local protocol and pharmacist/oncologist guidance.
-            </p>
-          </section>
+          </details>
         </div>
       </main>
 
