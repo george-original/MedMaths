@@ -1,21 +1,29 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
 import "./globals.css"
-
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  preload: true,
-})
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.medmaths.com"),
-  title: "MedMaths | Medication Dose, IV & Tablet Calculators",
+  title: "MedMaths | Med Maths Medication Calculators",
   description:
-    "Medication dose calculators for nurses and clinicians: mg to mL, tablet dosing, IV drip rates, dilutions, BSA, IBW, and CrCl.",
+    "MedMaths, also searched as Med Maths, provides medication dose, IV, tablet, dilution, BSA, IBW, and CrCl calculators for nurses and clinicians.",
   alternates: {
     canonical: "https://www.medmaths.com",
+  },
+  applicationName: "MedMaths",
+  appleWebApp: {
+    title: "MedMaths",
+  },
+  manifest: "/site.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+    shortcut: ["/favicon.ico"],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   verification: {
     google: "maNa29tVHXpls0DkzV1GAlJn72k-I28ftp1O2AfxY6Y",
@@ -36,9 +44,9 @@ export const metadata: Metadata = {
     locale: "en_AU",
     url: "https://www.medmaths.com",
     siteName: "MedMaths",
-    title: "MedMaths | Medication Dose, IV & Tablet Calculators",
+    title: "MedMaths | Med Maths Medication Calculators",
     description:
-      "Focused medication maths calculators with formulas, worked examples, and instant results.",
+      "MedMaths, also searched as Med Maths, provides focused medication maths calculators with formulas, worked examples, and instant results.",
   },
 }
 
@@ -48,13 +56,15 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en-AU">
       <head>
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1935059419471624"
+          crossOrigin="anonymous"
+        />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   )
 }

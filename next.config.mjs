@@ -1,15 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  poweredByHeader: false,
+  reactStrictMode: true,
   images: {
     unoptimized: true,
   },
   async redirects() {
     return [
-      
-
       // Removed broad calculator sections -> focused calculator directory
       {
         source: "/calculator/cardiology/:slug*",
@@ -62,61 +59,72 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: "/calculator/dose-calculations/dose-calculations",
+        destination: "/calculator/dose-calculations",
+        permanent: true,
+      },
+      {
+        source: "/calculator/dose-calculations/medication-math-formula",
+        destination: "/calculator/dose-calculations",
+        permanent: true,
+      },
+      {
+        source: "/calculator/dilutions/vial-dose-to-ml",
+        destination: "/calculator/dose-calculations/mg-to-ml#reconstituted-vial",
+        permanent: true,
+      },
+      {
+        source: "/calculator/tablet-dosing/mg-to-tablets",
+        destination: "/calculator/tablet-dosing#fixed-dose",
+        permanent: true,
+      },
+      {
+        source: "/calculator/tablet-dosing/mgkg-to-tablets",
+        destination: "/calculator/tablet-dosing#weight-based",
+        permanent: true,
+      },
+      {
+        source: "/calculator/renal-function",
+        destination: "/calculator/renal-function/creatinine-clearance",
+        permanent: true,
+      },
+      {
         source: "/calculator/infusion-rates/:slug*",
         destination: "/calculator/iv-fluids",
         permanent: true,
       },
 
-      // WordPress tag pages -> calculators
+      // WordPress tag and category pages -> calculators
       {
         source: "/tag/:slug*",
         destination: "/calculators",
-        permanent: true, // 301
+        permanent: true,
       },
-      
-      // WordPress category pages -> calculators
       {
         source: "/category/:slug*",
         destination: "/calculators",
-        permanent: true, // 301
+        permanent: true,
       },
-      
-      // WordPress author pages -> homepage
+
+      // WordPress author and pagination pages -> homepage
       {
         source: "/author/:slug*",
         destination: "/",
-        permanent: true, // 301
+        permanent: true,
       },
-      
-      // WordPress pagination -> homepage
       {
         source: "/page/:num",
         destination: "/",
-        permanent: true, // 301
+        permanent: true,
       },
-      
-      // WordPress feeds -> return 410 Gone (cleaner than redirecting)
-      {
-        source: "/feed",
-        destination: "/410",
-        permanent: true, // 301 to 410 page
-      },
-      {
-        source: "/comments/feed",
-        destination: "/410",
-        permanent: true, // 301 to 410 page
-      },
-      {
-        source: "/sitemap.rss",
-        destination: "/410",
-        permanent: true, // 301 to 410 page
-      },
-      
+
+      // Retired feed URLs are handled by dedicated 410 route handlers.
+
       // Specific old WordPress post URL
       {
         source: "/mg-to-ml-calculator-mg-ml-medmaths/",
         destination: "/calculator/dose-calculations/mg-to-ml",
-        permanent: true, // 301
+        permanent: true,
       },
     ]
   },

@@ -1,299 +1,570 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Calculator, Copy, RotateCcw } from "lucide-react"
+import { useRef, useState, type KeyboardEvent } from "react"
+import { Scale, Syringe } from "lucide-react"
+import {
+  CalculatorActions,
+  CalculatorCopyButton,
+  CalculatorField,
+  CalculatorInput,
+  CalculatorNotice,
+  CalculatorResult,
+  CalculatorSegmentedControl,
+  CalculatorSelect,
+  CalculatorShell,
+  CalculatorWorking,
+  VolumeMeasurementGuide,
+} from "@/components/calculator"
+import { useResultReveal } from "@/hooks/use-result-reveal"
+import { kilogramsToPounds, poundsToKilograms } from "@/lib/measurement-conversions"
+import { formatSafeNumber } from "@/lib/safe-number-format"
+import {
+  calculateWeightBasedLiquidDose,
+  type WeightBasedDoseBasis,
+  type WeightBasedLiquidDoseResult,
+  type WeightUnit,
+} from "@/lib/weight-based-liquid-formulas"
+
+type Errors = {
+  dose?: string
+  weight?: string
+  dosesPerDay?: string
+  concentration?: string
+  strength?: string
+  labelVolume?: string
+  copy?: string
+}
+
+function parseNumber(value: string): number | null {
+  const cleaned = value.replace(/,/g, "").trim()
+  if (!cleaned) return null
+  if (!/^(?:\d+\.?\d*|\.\d+)$/.test(cleaned)) return null
+
+  const parsed = Number(cleaned)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function formatResult(value: number, decimalPlaces: number): string {
+  return formatSafeNumber(value, decimalPlaces, { maxDecimals: 12 })
+}
+
+function formatInput(value: number, decimals = 2): string {
+  return value.toFixed(decimals).replace(/\.?0+$/, "")
+}
 
 export default function MgKgToMlDoseClient() {
+  const [doseBasis, setDoseBasis] = useState<WeightBasedDoseBasis>("perDose")
   const [doseMgPerKg, setDoseMgPerKg] = useState("")
-  const [weightKg, setWeightKg] = useState("")
+  const [weightValue, setWeightValue] = useState("")
+  const [weightUnit, setWeightUnit] = useState<WeightUnit>("kg")
+  const [dosesPerDay, setDosesPerDay] = useState("")
   const [concMgPerMl, setConcMgPerMl] = useState("")
-
   const [useFormatHelper, setUseFormatHelper] = useState(false)
   const [strengthMg, setStrengthMg] = useState("")
-  const [volumeMl, setVolumeMl] = useState("")
+  const [labelVolumeMl, setLabelVolumeMl] = useState("")
 
-  const [resultMl, setResultMl] = useState<number | null>(null)
-  const [totalDoseMg, setTotalDoseMg] = useState<number | null>(null)
-
+  const [result, setResult] = useState<WeightBasedLiquidDoseResult | null>(null)
   const [decimals, setDecimals] = useState(2)
-  const [copied, setCopied] = useState(false)
+  const [errors, setErrors] = useState<Errors>({})
 
-  const parseNumber = (str: string): number | null => {
-    const cleaned = str.replace(/,/g, "").trim()
-    if (!cleaned) return null
-    const num = Number.parseFloat(cleaned)
-    return Number.isFinite(num) ? num : null
+  const doseRef = useRef<HTMLInputElement>(null)
+  const weightRef = useRef<HTMLInputElement>(null)
+  const dosesPerDayRef = useRef<HTMLInputElement>(null)
+  const concentrationRef = useRef<HTMLInputElement>(null)
+  const strengthRef = useRef<HTMLInputElement>(null)
+  const labelVolumeRef = useRef<HTMLInputElement>(null)
+  const resultRef = useResultReveal<HTMLDivElement>(result !== null)
+
+  function clearResult() {
+    setResult(null)
+    setErrors((current) => ({ ...current, copy: undefined }))
   }
 
-  const formatResult = (value: number, decimalPlaces: number): string => {
-    if (decimalPlaces === 0) return Math.round(value).toString()
-    return value.toFixed(decimalPlaces)
+  function changeDoseBasis(nextBasis: WeightBasedDoseBasis) {
+    if (nextBasis === doseBasis) return
+    setDoseBasis(nextBasis)
+    setResult(null)
+    setErrors({})
+    window.requestAnimationFrame(() => {
+      if (nextBasis === "perDose") doseRef.current?.focus()
+      else dosesPerDayRef.current?.focus()
+    })
   }
 
-  const handleFormatHelperChange = () => {
+  function changeWeightUnit(nextUnit: WeightUnit) {
+    if (nextUnit === weightUnit) return
+
+    const currentWeight = parseNumber(weightValue)
+    if (currentWeight !== null && currentWeight > 0) {
+      const converted = nextUnit === "lb" ? kilogramsToPounds(currentWeight) : poundsToKilograms(currentWeight)
+      setWeightValue(formatInput(converted, nextUnit === "lb" ? 2 : 3))
+    }
+
+    setWeightUnit(nextUnit)
+    setResult(null)
+    setErrors((current) => ({ ...current, weight: undefined, copy: undefined }))
+    window.requestAnimationFrame(() => weightRef.current?.focus())
+  }
+
+  function validateConcentration(): number | null {
     if (!useFormatHelper) {
-      setUseFormatHelper(true)
-    } else {
-      setUseFormatHelper(false)
-      setStrengthMg("")
-      setVolumeMl("")
-      setConcMgPerMl("")
-    }
-  }
-
-  const updateConcentration = () => {
-    if (useFormatHelper && strengthMg && volumeMl) {
-      const strength = parseNumber(strengthMg)
-      const vol = parseNumber(volumeMl)
-      if (strength !== null && vol !== null && vol > 0) {
-        const calc = strength / vol
-        setConcMgPerMl(formatResult(calc, 2))
+      const concentration = parseNumber(concMgPerMl)
+      if (concentration === null || concentration <= 0) {
+        setErrors((current) => ({
+          ...current,
+          concentration: "Enter a positive concentration using numbers only, such as 50.",
+        }))
+        concentrationRef.current?.focus()
+        return null
       }
+      return concentration
     }
+
+    const strength = parseNumber(strengthMg)
+    if (strength === null || strength <= 0) {
+      setErrors((current) => ({
+        ...current,
+        strength: "Enter the positive strength shown on the label, such as 250.",
+      }))
+      strengthRef.current?.focus()
+      return null
+    }
+
+    const labelVolume = parseNumber(labelVolumeMl)
+    if (labelVolume === null || labelVolume <= 0) {
+      setErrors((current) => ({
+        ...current,
+        labelVolume: "Enter the positive label volume using numbers only, such as 5.",
+      }))
+      labelVolumeRef.current?.focus()
+      return null
+    }
+
+    return strength / labelVolume
   }
 
-  const handleCalculate = () => {
-    const mgPerKg = parseNumber(doseMgPerKg)
-    const kg = parseNumber(weightKg)
+  function calculate() {
+    setErrors({})
 
-    if (mgPerKg === null || mgPerKg <= 0) {
-      alert("Please enter a valid dose in mg/kg.")
+    const dose = parseNumber(doseMgPerKg)
+    if (dose === null || dose <= 0) {
+      setErrors({
+        dose:
+          doseBasis === "perDose"
+            ? "Enter a positive mg/kg amount for one dose, such as 10."
+            : "Enter a positive total daily amount in mg/kg/day, such as 20.",
+      })
+      doseRef.current?.focus()
       return
     }
-    if (kg === null || kg <= 0) {
-      alert("Please enter a valid weight in kg.")
+
+    const weight = parseNumber(weightValue)
+    if (weight === null || weight <= 0) {
+      setErrors({
+        weight: `Enter a positive patient weight in ${weightUnit === "kg" ? "kilograms" : "pounds"} using numbers only.`,
+      })
+      weightRef.current?.focus()
       return
     }
 
-    // Determine concentration
-    let conc: number | null = null
-
-    if (useFormatHelper && strengthMg && volumeMl) {
-      const strength = parseNumber(strengthMg)
-      const vol = parseNumber(volumeMl)
-      if (strength !== null && vol !== null && vol > 0) {
-        conc = strength / vol
-        setConcMgPerMl(formatResult(conc, 2))
+    let dividedDoses: number | undefined
+    if (doseBasis === "perDay") {
+      const parsedDoses = parseNumber(dosesPerDay)
+      if (parsedDoses === null || !Number.isInteger(parsedDoses) || parsedDoses <= 0) {
+        setErrors({ dosesPerDay: "Enter the prescribed number of divided doses as a positive whole number, such as 4." })
+        dosesPerDayRef.current?.focus()
+        return
       }
-    } else {
-      conc = parseNumber(concMgPerMl)
+      dividedDoses = parsedDoses
     }
 
-    if (conc === null || conc <= 0) {
-      alert("Please enter a valid concentration in mg/mL (or use the label helper).")
-      return
-    }
+    const concentration = validateConcentration()
+    if (concentration === null) return
 
-    const totalMg = mgPerKg * kg
-    const volume = totalMg / conc
+    const nextResult = calculateWeightBasedLiquidDose({
+      doseMgPerKg: dose,
+      weight,
+      weightUnit,
+      doseBasis,
+      dosesPerDay: dividedDoses,
+      concentrationMgPerMl: concentration,
+    })
 
-    setTotalDoseMg(totalMg)
-    setResultMl(volume)
+    setConcMgPerMl(formatResult(concentration, 4))
+    setResult(nextResult)
   }
 
-  const handleReset = () => {
+  function reset() {
+    setDoseBasis("perDose")
     setDoseMgPerKg("")
-    setWeightKg("")
+    setWeightValue("")
+    setWeightUnit("kg")
+    setDosesPerDay("")
     setConcMgPerMl("")
     setUseFormatHelper(false)
     setStrengthMg("")
-    setVolumeMl("")
-    setResultMl(null)
-    setTotalDoseMg(null)
+    setLabelVolumeMl("")
+    setResult(null)
     setDecimals(2)
-    setCopied(false)
+    setErrors({})
+    window.requestAnimationFrame(() => doseRef.current?.focus())
   }
 
-  const handleCopyResult = () => {
-    if (resultMl !== null) {
-      const formatted = formatResult(resultMl, decimals)
-      navigator.clipboard.writeText(formatted)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
+  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") calculate()
   }
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") handleCalculate()
-  }
+  const formattedVolume = result === null ? "" : formatResult(result.volumePerDoseMl, decimals)
+  const formattedPerDoseMg = result === null ? "" : formatResult(result.perDoseMg, 4)
+  const formattedWeightKg = result === null ? "" : formatResult(result.weightKg, 4)
+  const formattedDailyMg = result?.dailyDoseMg === null || result?.dailyDoseMg === undefined
+    ? ""
+    : formatResult(result.dailyDoseMg, 4)
+  const resultStatus =
+    result !== null && (result.volumePerDoseMl < 0.05 || result.volumePerDoseMl > 50) ? "warning" : "default"
+
+  const weightWorking =
+    result && result.weightUnit === "lb"
+      ? [`Weight = ${formatResult(result.weightInput, 4)} lb × 0.45359237 = ${formattedWeightKg} kg`]
+      : []
+
+  const doseWorking =
+    result?.doseBasis === "perDay"
+      ? [
+          `Daily mg = ${formatResult(result.orderedDoseMgPerKg, 4)} mg/kg/day × ${formattedWeightKg} kg = ${formattedDailyMg} mg/day`,
+          `mg per dose = ${formattedDailyMg} ÷ ${result.dosesPerDay} doses/day = ${formattedPerDoseMg} mg`,
+          `Per-dose equivalent = ${formatResult(result.perDoseMgPerKg, 4)} mg/kg per dose`,
+        ]
+      : result
+        ? [
+            `mg per dose = ${formatResult(result.orderedDoseMgPerKg, 4)} mg/kg × ${formattedWeightKg} kg = ${formattedPerDoseMg} mg`,
+          ]
+        : []
 
   return (
-    <div className="space-y-6">
-      {/* Main inputs */}
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">Dose (mg/kg)</label>
-          <input
+    <CalculatorShell
+      id="mgkg-to-ml-tool"
+      theme="dose"
+      eyebrow="Dose calculations"
+      title="Calculate a weight-based liquid dose"
+      description="Choose whether the order is written per dose or per day, enter weight in kg or lb, then use the exact medicine concentration shown on the label."
+      icon={<Scale className="size-5" />}
+    >
+      <div className="flex justify-center">
+        <CalculatorSegmentedControl
+          value={doseBasis}
+          options={[
+            { value: "perDose", label: "mg/kg per dose" },
+            { value: "perDay", label: "mg/kg per day" },
+          ]}
+          onChange={changeDoseBasis}
+          ariaLabel="Choose how the weight-based order is written"
+          className="w-full sm:w-auto"
+        />
+      </div>
+
+      {doseBasis === "perDose" ? (
+        <CalculatorNotice variant="warning" title="Use the amount ordered for one dose">
+          Enter the prescribed mg/kg amount for a single administration. The calculator does not check maximum single-dose or daily-dose limits.
+        </CalculatorNotice>
+      ) : (
+        <CalculatorNotice variant="warning" title="Confirm the number of divided doses">
+          Enter the total order in mg/kg/day and the prescribed number of doses per day. The calculator divides the daily total evenly for arithmetic checking only.
+        </CalculatorNotice>
+      )}
+
+      <div className="space-y-5">
+        <CalculatorField
+          id="mgkg-dose"
+          label={doseBasis === "perDose" ? "Ordered dose per administration" : "Ordered total daily dose"}
+          unit={doseBasis === "perDose" ? "mg/kg per dose" : "mg/kg/day"}
+          helperText={
+            doseBasis === "perDose"
+              ? "Enter the amount prescribed for one dose."
+              : "Enter the total weight-based amount prescribed across the whole day."
+          }
+          error={errors.dose}
+          required
+        >
+          <CalculatorInput
+            ref={doseRef}
             type="text"
+            inputMode="decimal"
             value={doseMgPerKg}
-            onChange={(e) => setDoseMgPerKg(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="e.g., 10"
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            onChange={(event) => {
+              setDoseMgPerKg(event.target.value)
+              setErrors((current) => ({ ...current, dose: undefined }))
+              clearResult()
+            }}
+            onKeyDown={handleKeyDown}
+            placeholder={doseBasis === "perDose" ? "e.g., 10" : "e.g., 20"}
+            autoComplete="off"
           />
-          <p className="text-xs text-gray-500 mt-1">Enter the ordered dose per kilogram. Commas accepted if needed.</p>
-        </div>
+        </CalculatorField>
 
-        <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">Patient weight (kg)</label>
-          <input
-            type="text"
-            value={weightKg}
-            onChange={(e) => setWeightKg(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="e.g., 70"
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-          />
-          <p className="text-xs text-gray-500 mt-1">Use kilograms (kg). Double-check paediatric weights.</p>
-        </div>
-
-        <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">Concentration (mg/mL)</label>
-          <input
-            type="text"
-            value={concMgPerMl}
-            onChange={(e) => setConcMgPerMl(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="e.g., 50"
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Concentration in mg per mL. Leave blank if using the label helper below.
-          </p>
-        </div>
-      </div>
-
-      <div className="border-t pt-4">
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={useFormatHelper}
-            onChange={handleFormatHelperChange}
-            className="w-4 h-4 rounded border-gray-300 cursor-pointer"
-          />
-          <span className="text-sm font-medium text-gray-700">I have mg per X mL (e.g., 250 mg per 5 mL)</span>
-        </label>
-      </div>
-
-      {useFormatHelper && (
-        <div className="bg-cyan-50 rounded-lg p-4 space-y-4 border border-cyan-200">
-          <p className="text-sm text-gray-700 font-medium">Convert label format to mg/mL:</p>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Strength (mg)</label>
-              <input
-                type="text"
-                value={strengthMg}
-                onChange={(e) => {
-                  setStrengthMg(e.target.value)
-                  if (e.target.value && volumeMl) setTimeout(updateConcentration, 0)
-                }}
-                placeholder="e.g., 250"
-                className="w-full px-3 py-2 rounded border border-cyan-300 bg-white text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Volume (mL)</label>
-              <input
-                type="text"
-                value={volumeMl}
-                onChange={(e) => {
-                  setVolumeMl(e.target.value)
-                  if (e.target.value && strengthMg) setTimeout(updateConcentration, 0)
-                }}
-                placeholder="e.g., 5"
-                className="w-full px-3 py-2 rounded border border-cyan-300 bg-white text-sm"
-              />
-            </div>
-          </div>
-
-          {concMgPerMl && (
-            <div className="text-sm text-gray-600">
-              <span className="font-medium">Calculated concentration:</span> {concMgPerMl} mg/mL
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="flex gap-3 pt-2">
-        <Button
-          onClick={handleCalculate}
-          className="flex-1 bg-cyan-600 hover:bg-cyan-700 text-white font-medium py-3 rounded-lg"
-        >
-          <Calculator className="mr-2 h-4 w-4" />
-          Calculate
-        </Button>
-        <Button
-          onClick={handleReset}
-          variant="outline"
-          className="px-6 py-3 rounded-lg border border-gray-300 hover:bg-gray-50 bg-transparent"
-        >
-          <RotateCcw className="h-4 w-4" />
-        </Button>
-      </div>
-
-      {resultMl !== null && (
-        <div className="rounded-lg border border-cyan-200 bg-cyan-50 p-6 space-y-4">
-          <div>
-            <p className="text-sm text-gray-600 mb-1">Volume required</p>
-            <p className="text-3xl font-bold text-cyan-700">{formatResult(resultMl, decimals)} mL</p>
-          </div>
-
-          {totalDoseMg !== null && (
-            <div className="text-sm text-gray-700">
-              <span className="font-medium">Total dose:</span> {formatResult(totalDoseMg, 2)} mg
-            </div>
-          )}
-
-          <div className="border-t pt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Round to decimals:</label>
-            <select
-              value={decimals}
-              onChange={(e) => setDecimals(Number.parseInt(e.target.value))}
-              className="w-full px-3 py-2 rounded border border-gray-300 bg-white text-sm"
-            >
-              <option value={0}>0 decimals</option>
-              <option value={1}>1 decimal</option>
-              <option value={2}>2 decimals</option>
-              <option value={3}>3 decimals</option>
-            </select>
-            <p className="text-xs text-gray-500 mt-1">Result: {formatResult(resultMl, decimals)} mL</p>
-          </div>
-
-          <button
-            onClick={handleCopyResult}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white border border-cyan-300 rounded-lg hover:bg-cyan-50 text-sm font-medium text-cyan-700 transition-colors"
+        {doseBasis === "perDay" && (
+          <CalculatorField
+            id="mgkg-doses-per-day"
+            label="Divided doses per day"
+            unit="doses/day"
+            helperText="Enter the prescribed number of administrations used to divide the daily total."
+            error={errors.dosesPerDay}
+            required
           >
-            {copied ? "Copied!" : "Copy result"}
-            <Copy className="h-4 w-4" />
-          </button>
+            <CalculatorInput
+              ref={dosesPerDayRef}
+              type="text"
+              inputMode="numeric"
+              value={dosesPerDay}
+              onChange={(event) => {
+                setDosesPerDay(event.target.value)
+                setErrors((current) => ({ ...current, dosesPerDay: undefined }))
+                clearResult()
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder="e.g., 4"
+              autoComplete="off"
+            />
+          </CalculatorField>
+        )}
 
-          {/* Working out box */}
-          <div className="bg-white rounded p-3 font-mono text-xs text-gray-600 space-y-1">
-            <div>Total mg = (mg/kg) × kg</div>
-            <div>mL = Total mg ÷ (mg/mL)</div>
-            <div className="pt-1 border-t border-gray-100" />
-            <div>
-              Total mg = {doseMgPerKg || "—"} × {weightKg || "—"} = {totalDoseMg === null ? "—" : formatResult(totalDoseMg, 2)}
-            </div>
-            <div>
-              mL = {totalDoseMg === null ? "—" : formatResult(totalDoseMg, 2)} ÷ {concMgPerMl || "—"} ={" "}
-              {formatResult(resultMl, decimals)}
-            </div>
-          </div>
+        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
+          <CalculatorField
+            id="mgkg-weight"
+            label="Patient weight"
+            unit={weightUnit}
+            helperText="Use the medication weight required by the order or clinical reference."
+            error={errors.weight}
+            required
+          >
+            <CalculatorInput
+              ref={weightRef}
+              type="text"
+              inputMode="decimal"
+              value={weightValue}
+              onChange={(event) => {
+                setWeightValue(event.target.value)
+                setErrors((current) => ({ ...current, weight: undefined }))
+                clearResult()
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder={weightUnit === "kg" ? "e.g., 18" : "e.g., 40"}
+              autoComplete="off"
+            />
+          </CalculatorField>
 
-          <div className="pt-2 border-t">
-            <a
-              href="/calculator/dose-calculations/mg-to-ml"
-              className="text-sm text-cyan-600 hover:text-cyan-700 font-medium"
+          <CalculatorField
+            id="mgkg-weight-unit"
+            label="Weight unit"
+            helperText="Pounds are converted to kilograms before the dose is calculated."
+            required
+          >
+            <CalculatorSelect value={weightUnit} onChange={(event) => changeWeightUnit(event.target.value as WeightUnit)}>
+              <option value="kg">Kilograms (kg)</option>
+              <option value="lb">Pounds (lb)</option>
+            </CalculatorSelect>
+          </CalculatorField>
+        </div>
+
+        <div className="border-t border-gray-200 pt-5">
+          <p className="mb-3 text-sm font-semibold text-gray-900">How is the medicine strength written?</p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => {
+                setUseFormatHelper(false)
+                setErrors((current) => ({ ...current, strength: undefined, labelVolume: undefined }))
+                clearResult()
+              }}
+              aria-pressed={!useFormatHelper}
+              className={`rounded-xl border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:[--tw-ring-color:var(--calculator-focus)] ${
+                !useFormatHelper
+                  ? "[border-color:var(--calculator-accent)] [background-color:var(--calculator-soft)]"
+                  : "border-gray-200 bg-white hover:bg-gray-50"
+              }`}
             >
-              Prefer mg → mL directly? Use mg → mL →
-            </a>
+              <span className="block text-sm font-semibold text-gray-950">I know the concentration</span>
+              <span className="mt-1 block text-xs text-gray-500">Example: 50 mg/mL</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setUseFormatHelper(true)
+                setErrors((current) => ({ ...current, concentration: undefined }))
+                clearResult()
+              }}
+              aria-pressed={useFormatHelper}
+              className={`rounded-xl border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:[--tw-ring-color:var(--calculator-focus)] ${
+                useFormatHelper
+                  ? "[border-color:var(--calculator-accent)] [background-color:var(--calculator-soft)]"
+                  : "border-gray-200 bg-white hover:bg-gray-50"
+              }`}
+            >
+              <span className="block text-sm font-semibold text-gray-950">My label says mg per X mL</span>
+              <span className="mt-1 block text-xs text-gray-500">Example: 250 mg / 5 mL</span>
+            </button>
           </div>
         </div>
+
+        {!useFormatHelper ? (
+          <CalculatorField
+            id="mgkg-concentration"
+            label="Concentration"
+            unit="mg/mL"
+            helperText="Use the concentration of the exact liquid medicine being prepared or administered."
+            error={errors.concentration}
+            required
+          >
+            <CalculatorInput
+              ref={concentrationRef}
+              type="text"
+              inputMode="decimal"
+              value={concMgPerMl}
+              onChange={(event) => {
+                setConcMgPerMl(event.target.value)
+                setErrors((current) => ({ ...current, concentration: undefined }))
+                clearResult()
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder="e.g., 50"
+              autoComplete="off"
+            />
+          </CalculatorField>
+        ) : (
+          <div className="space-y-4 rounded-2xl border p-4 [border-color:var(--calculator-border)] [background-color:var(--calculator-softer)] sm:p-5">
+            <p className="text-sm leading-6 text-gray-700">
+              Enter the amount and volume exactly as written on the label. The calculator converts them to mg/mL before calculating the dose volume.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <CalculatorField id="mgkg-label-strength" label="Label strength" unit="mg" error={errors.strength} required>
+                <CalculatorInput
+                  ref={strengthRef}
+                  type="text"
+                  inputMode="decimal"
+                  value={strengthMg}
+                  onChange={(event) => {
+                    setStrengthMg(event.target.value)
+                    setErrors((current) => ({ ...current, strength: undefined }))
+                    clearResult()
+                  }}
+                  onKeyDown={handleKeyDown}
+                  placeholder="e.g., 250"
+                  autoComplete="off"
+                />
+              </CalculatorField>
+
+              <CalculatorField id="mgkg-label-volume" label="Label volume" unit="mL" error={errors.labelVolume} required>
+                <CalculatorInput
+                  ref={labelVolumeRef}
+                  type="text"
+                  inputMode="decimal"
+                  value={labelVolumeMl}
+                  onChange={(event) => {
+                    setLabelVolumeMl(event.target.value)
+                    setErrors((current) => ({ ...current, labelVolume: undefined }))
+                    clearResult()
+                  }}
+                  onKeyDown={handleKeyDown}
+                  placeholder="e.g., 5"
+                  autoComplete="off"
+                />
+              </CalculatorField>
+            </div>
+            <p className="text-xs text-gray-500">Example: 250 mg / 5 mL becomes 50 mg/mL.</p>
+          </div>
+        )}
+      </div>
+
+      <CalculatorActions onCalculate={calculate} onReset={reset} calculateIcon={<Syringe className="size-4" />} />
+
+      {result && (
+        <div className="space-y-4">
+          <CalculatorResult
+            ref={resultRef}
+            label="Volume per dose"
+            value={formattedVolume}
+            unit="mL"
+            status={resultStatus}
+            badge={
+              <span className="rounded-full border border-current/15 bg-white/70 px-2 py-0.5 text-xs font-semibold">
+                {result.doseBasis === "perDay"
+                  ? `Daily total: ${formattedDailyMg} mg ÷ ${result.dosesPerDay} doses`
+                  : `Dose: ${formattedPerDoseMg} mg`}
+              </span>
+            }
+            interpretation={
+              result.doseBasis === "perDay" ? (
+                <>
+                  {formatResult(result.orderedDoseMgPerKg, 4)} mg/kg/day at {formattedWeightKg} kg gives {formattedDailyMg} mg/day. Divided into {result.dosesPerDay} doses, each dose is {formattedPerDoseMg} mg or {formattedVolume} mL at {formatResult(result.concentrationMgPerMl, 4)} mg/mL.
+                </>
+              ) : (
+                <>
+                  {formatResult(result.orderedDoseMgPerKg, 4)} mg/kg × {formattedWeightKg} kg = {formattedPerDoseMg} mg per dose. At {formatResult(result.concentrationMgPerMl, 4)} mg/mL, the required volume is {formattedVolume} mL.
+                </>
+              )
+            }
+            actions={
+              <CalculatorCopyButton
+                value={`${formattedVolume} mL per dose (${formattedPerDoseMg} mg per dose${result.doseBasis === "perDay" ? `; ${formattedDailyMg} mg/day in ${result.dosesPerDay} doses` : ""})`}
+                onError={() =>
+                  setErrors((current) => ({
+                    ...current,
+                    copy: "Copy failed. Select the result manually or check browser clipboard permissions.",
+                  }))
+                }
+              />
+            }
+          >
+            {resultStatus === "warning" && (
+              <CalculatorNotice variant="warning" title="Quick check">
+                This calculated volume is unusually small or large. Recheck the order basis, patient weight, divided-dose count, concentration, maximum-dose limits, route, and administration device.
+              </CalculatorNotice>
+            )}
+            {result.weightUnit === "lb" && (
+              <CalculatorNotice variant="info" title="Weight conversion used">
+                {formatResult(result.weightInput, 4)} lb was converted to {formattedWeightKg} kg before the mg/kg calculation.
+              </CalculatorNotice>
+            )}
+            {errors.copy && (
+              <p role="alert" className="text-xs font-medium text-red-700">
+                {errors.copy}
+              </p>
+            )}
+          </CalculatorResult>
+
+          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
+            <CalculatorWorking
+              lines={[
+                ...weightWorking,
+                ...doseWorking,
+                "mL per dose = mg per dose ÷ concentration (mg/mL)",
+                `mL per dose = ${formattedPerDoseMg} ÷ ${formatResult(result.concentrationMgPerMl, 4)} = ${formattedVolume} mL`,
+              ]}
+            />
+
+            <CalculatorField
+              id="mgkg-rounding"
+              label="Display rounding"
+              helperText="This changes display only. Small non-zero values keep enough decimals to remain visible."
+            >
+              <CalculatorSelect value={decimals} onChange={(event) => setDecimals(Number(event.target.value))}>
+                <option value={0}>Whole number (non-zero preserved)</option>
+                <option value={1}>1 decimal place</option>
+                <option value={2}>2 decimal places</option>
+                <option value={3}>3 decimal places</option>
+              </CalculatorSelect>
+            </CalculatorField>
+          </div>
+
+          <VolumeMeasurementGuide
+            volumeMl={result.volumePerDoseMl}
+            theme="dose"
+            title="Measurement check"
+            description="Compare the calculated volume with the markings on the prescribed administration device. This guide does not select a syringe or approve rounding."
+          />
+        </div>
       )}
-    </div>
+    </CalculatorShell>
   )
 }

@@ -10,7 +10,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-xl">
       <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" className="flex shrink-0 items-center gap-3">
-          <Image src="/medmaths-logo.png" alt="MedMaths" width={32} height={32} className="h-8 w-8" />
+          <Image src="/medmaths-logo.png" alt="MedMaths medical maths calculators" width={32} height={32} className="h-8 w-8" />
           <span className="text-xl font-semibold tracking-tight text-foreground">MedMaths</span>
         </Link>
 

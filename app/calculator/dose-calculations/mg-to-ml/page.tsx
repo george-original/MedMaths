@@ -4,17 +4,20 @@ import Link from "next/link"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { FAQAccordion } from "@/components/faq-accordion"
+import { RelatedCalculators } from "@/components/related-calculators"
+import { getCalculatorNetworkItems } from "@/lib/calculator-network"
+import { CalculatorContentDisclosure, CalculatorEquation, CalculatorTrustBlock, SimpleFormulaAnswer } from "@/components/calculator"
 
 import MgToMlClient from "./mg-to-ml-client"
 
 const CANONICAL = "https://www.medmaths.com/calculator/dose-calculations/mg-to-ml"
-const UPDATED_DATE_ISO = "2026-06-21"
-const UPDATED_DATE_HUMAN = "21 Jun 2026"
+const UPDATED_DATE_ISO = "2026-07-30"
+const UPDATED_DATE_HUMAN = "30 Jul 2026"
 
 export const metadata: Metadata = {
   title: "mg to mL Calculator for Medicine | Dose & Syringe",
   description: "Convert mg to mL from a medicine label using mg/mL or mg per 5 mL. Shows the formula, syringe-volume examples, and why concentration matters.",
-  keywords: ["mg to mL calculator", "mg to ml drug conversion", "mg to ml medicine", "mg to ml syringe", "mg per 5 ml calculator", "dose to volume calculator", "mg/mL calculator", "2.5 mg to ml", "mg to ml", "mg to mL", "mg/ml", "mg/mL", "dose volume", "syringe volume", "medicine concentration"],
+  keywords: ["mg to mL calculator", "mg to ml drug conversion", "mg to ml medicine", "mg to ml syringe", "mg per 5 ml calculator", "dose to volume calculator", "mg/mL calculator", "2.5 mg to ml", "how many mg in 1 ml", "is mg the same as ml", "liquid medicine dose calculator", "antibiotic dose in mL", "injection volume calculator", "mg to mL", "mg/ml", "dose volume", "syringe volume", "medicine concentration"],
   authors: [{ name: "George Lambroglou, RN", url: "https://www.medmaths.com/about" }],
   creator: "George Lambroglou, RN",
   publisher: "MedMaths",
@@ -55,82 +58,136 @@ export default function MgToMlPage() {
 
   const faqItems = [
     {
-      question: "What does mg/mL mean?",
-      quickAnswer: "mg/mL is the concentration: how many milligrams of medication are in each millilitre of solution.",
+      question: "How do you convert mg to mL for medicine?",
+      quickAnswer: "Divide the required dose in mg by the medicine concentration in mg/mL.",
       details: [
-        "Abbreviation: mg/mL = milligrams per millilitre",
-        "Example: 50 mg/mL means 50 mg of drug is dissolved in 1 mL of liquid",
-        "Medication labels often show it directly as mg/mL or indirectly as mg per X mL",
-        "Getting mg/mL right is essential for safe dose-to-volume calculations",
+        "Use the dose from the medication order, prescription, or study question",
+        "Use the concentration from the exact product label",
+        "If the label is already in mg/mL, divide the dose by that concentration",
+        "If the label is written as mg per X mL, enter both label values and let the calculator convert them first",
       ],
-      microExample: "A label reading 250 mg/5 mL is equivalent to 50 mg/mL.",
+      microExample: "500 mg ÷ 50 mg/mL = 10 mL.",
     },
     {
-      question: "How do I convert mg to mL?",
-      quickAnswer: "Divide the dose (mg) by the concentration (mg/mL) to get the volume in mL.",
+      question: "What does D/H × Q mean in medication calculations?",
+      quickAnswer: "It means desired dose divided by dose on hand, multiplied by the quantity containing the dose on hand.",
       details: [
-        "Formula: mL = mg ÷ (mg/mL)",
-        "Dose (mg) comes from the order/prescription",
-        "Concentration (mg/mL) comes from the vial/ampoule/bag label",
-        "Always confirm your units match before calculating",
+        "D is the desired, ordered, or required dose",
+        "H is the dose on hand or supplied dose",
+        "Q is the supplied quantity, such as 5 mL",
+        "Required dose over supplied dose and stock required over stock supplied describe the same method",
       ],
-      microExample: "500 mg ÷ 50 mg/mL = 10 mL",
+      microExample: "500 mg ÷ 250 mg × 5 mL = 10 mL.",
     },
     {
-      question: "What if the label says mg per 5 mL (or per X mL)?",
-      quickAnswer: "Convert it to mg/mL first by dividing the label mg by the label mL, then do mg ÷ (mg/mL).",
+      question: "What does mg/mL mean on a medication label?",
+      quickAnswer: "mg/mL is the concentration: how many milligrams of medication are in each 1 mL.",
+      details: [
+        "50 mg/mL means each 1 mL contains 50 mg",
+        "To find mL from mg, divide by the concentration",
+        "To find mg from mL, multiply by the concentration",
+        "A concentration is not a dose by itself",
+      ],
+      microExample: "250 mg/5 mL is equivalent to 50 mg/mL.",
+    },
+    {
+      question: "What if the label says 250 mg/5 mL or mg per X mL?",
+      quickAnswer: "Enter the label amount and label volume so the calculator can convert the strength to mg/mL first.",
       details: [
         "Example label: 250 mg per 5 mL",
-        "Convert: 250 ÷ 5 = 50 mg/mL",
-        "Then calculate volume: dose ÷ 50",
-        "Use the calculator’s label-format option to do this quickly",
+        "The concentration is 250 ÷ 5 = 50 mg/mL",
+        "The same input path can be used for a reconstituted vial when the verified final vial volume is known",
+        "Do not assume the amount of diluent added equals the final vial volume",
       ],
-      microExample: "400 mg in 8 mL → 400 ÷ 8 = 50 mg/mL",
+      microExample: "400 mg in a final volume of 8 mL = 50 mg/mL.",
     },
     {
-      question: "Is mg → mL always possible?",
-      quickAnswer:
-        "Only if you know the concentration (mg/mL) or density. For medication dosing, you usually use mg/mL from the label.",
+      question: "Can I calculate a dose from a reconstituted vial?",
+      quickAnswer: "Yes, when the total drug amount and verified final vial volume are already known.",
       details: [
-        "Medication dosing conversions require the product concentration (mg/mL)",
-        "Some general conversion sites use density (e.g., water-like density) — that’s not the same as medication concentration",
-        "If you’re dosing a medication, use the vial/ampoule/bag label concentration",
-        "If unsure, don’t guess — confirm the concentration/source",
+        "Use the final vial volume stated in the product information or pharmacy instructions",
+        "Powder displacement can make the final vial volume different from the diluent volume added",
+        "The calculator can check the dose-to-volume arithmetic but cannot choose a diluent or reconstitution procedure",
+        "If the ordered dose exceeds the total amount entered for one vial, check whether multiple vials are intended",
       ],
-      microExample: "Dose-to-volume: 10 mg ÷ 5 mg/mL = 2 mL (medication label).",
+      microExample: "500 mg in a final vial volume of 10 mL = 50 mg/mL; a 75 mg dose is 1.5 mL.",
     },
     {
-      question: "Why does rounding change the final mL?",
-      quickAnswer: "Different rounding levels give slightly different results; round to what you can safely measure.",
+      question: "Is mg the same as mL?",
+      quickAnswer: "No. mg measures medication mass and mL measures liquid volume.",
       details: [
-        "Rounding to 2 decimals is common (e.g., 3.13 mL)",
-        "Syringe markings (0.1 mL, 0.2 mL, 0.5 mL) determine what’s measurable",
-        "For very small volumes, consider an appropriate device (per local policy)",
-        "If your setting requires exact rounding rules, follow local guidance",
+        "They are different units",
+        "They can only be connected when the concentration is known",
+        "Do not assume 1 mg equals 1 mL",
+        "Different concentrations give different volumes for the same dose",
       ],
-      microExample: "3.125 mL rounds to 3.13 mL (2 decimals) or 3.1 mL (1 decimal).",
+      microExample: "At 5 mg/mL, 5 mg = 1 mL. At 50 mg/mL, 5 mg = 0.1 mL.",
     },
     {
-      question: "Can I use this for IV medications and IV bags?",
-      quickAnswer: "Yes — the formula is the same. Always confirm the label concentration and local IV prep policy.",
+      question: "How many mg are in 1 mL?",
+      quickAnswer: "It depends on the concentration printed on the medicine label.",
       details: [
-        "Oral liquids, injections, IV syringes, and IV bags all follow the same dose-to-volume logic",
-        "IV preparations often involve dilution in a defined bag size (e.g., 100 mL, 250 mL, 1 L)",
-        "This calculator helps check the arithmetic — it does not replace policy/protocol",
-        "Double-check inputs before administration",
+        "At 5 mg/mL, 1 mL contains 5 mg",
+        "At 50 mg/mL, 1 mL contains 50 mg",
+        "At 250 mg/5 mL, 1 mL contains 50 mg",
+        "The product strength must be checked before calculating",
       ],
-      microExample: "Morphine 10 mg ÷ 5 mg/mL = 2 mL.",
+      microExample: "250 mg/5 mL = 50 mg/mL, so 1 mL contains 50 mg.",
     },
     {
-      question: "Why might my answer differ from another calculator?",
-      quickAnswer: "Usually rounding, or the other tool is doing density-based conversion instead of mg/mL concentration.",
+      question: "How do you convert mL to mg?",
+      quickAnswer: "Multiply the volume in mL by the concentration in mg/mL.",
       details: [
-        "Check your inputs (dose and concentration)",
-        "Ensure units are truly mg/mL (not mg/5 mL left unconverted)",
-        "Different tools round differently",
-        "If results differ a lot, recalc manually or confirm label concentration",
+        "Formula: mg = mL × mg/mL",
+        "Use this when the measured volume and product concentration are known",
+        "This is the reverse of mg to mL",
+        "Select the mL → mg mode at the top of the calculator",
       ],
-      microExample: "3.13 mL vs 3.1 mL can both be correct depending on rounding.",
+      microExample: "2 mL × 50 mg/mL = 100 mg.",
+    },
+    {
+      question: "How do you calculate mL for a liquid antibiotic?",
+      quickAnswer: "Use the prescribed dose and the concentration on the supplied bottle label.",
+      details: [
+        "Liquid antibiotics are often labelled as mg per 5 mL",
+        "Enter the label amount and volume exactly as supplied",
+        "Use only the prescribed dose and the concentration of the product being administered",
+        "This calculator does not recommend an antibiotic or decide the dose",
+      ],
+      microExample: "250 mg from 125 mg/5 mL: 125 ÷ 5 = 25 mg/mL, then 250 ÷ 25 = 10 mL.",
+    },
+    {
+      question: "Can this calculator be used for injections or syringe volumes?",
+      quickAnswer: "It can check the arithmetic when the prescribed dose and exact product concentration are already known.",
+      details: [
+        "Use the concentration printed on the vial, ampoule, prefilled syringe, or medicine label",
+        "The result is a calculated volume, not a recommendation for a particular syringe or administration route",
+        "Very small volumes may not be measurable with the available device",
+        "High-risk medicines require the medication order, product information, local policy, and clinical judgement",
+      ],
+      microExample: "10 mg from a 5 mg/mL injection = 2 mL.",
+    },
+    {
+      question: "Can I use this calculator for insulin?",
+      quickAnswer: "Usually no. Insulin is commonly prescribed in units rather than milligrams.",
+      details: [
+        "Insulin labels are usually written as units/mL",
+        "Do not substitute an mg-to-mL calculation for a units-based medicine order",
+        "Use the Units to mL calculator only when prescribed units and the exact units/mL concentration are known",
+        "Follow the medicine order, device instructions, and local policy",
+      ],
+      microExample: "U-100 insulin is 100 units/mL, not 100 mg/mL.",
+    },
+    {
+      question: "Why might my result differ from another calculator?",
+      quickAnswer: "Common reasons are different rounding, a different label format, or using density instead of medicine concentration.",
+      details: [
+        "Check whether the concentration was entered as mg/mL or mg per X mL",
+        "Check whether the other result was rounded to fewer decimal places",
+        "This page uses medicine concentration and is not a density conversion for water, food, or chemicals",
+        "If results differ significantly, verify the product label and repeat the calculation manually",
+      ],
+      microExample: "3.125 mL may display as 3.13 mL or 3.1 mL depending on the chosen display precision.",
     },
   ]
 
@@ -142,17 +199,27 @@ export default function MgToMlPage() {
     },
     {
       q: "Practice 2: Label reads 250 mg/5 mL. Order is 125 mg. How many mL is the dose?",
-      steps: ["Step 1 (convert): 250 ÷ 5 = 50 mg/mL", "Step 2 (dose): mL = 125 ÷ 50", "mL = 2.5"],
+      steps: ["Step 1: 250 ÷ 5 = 50 mg/mL", "Step 2: mL = 125 ÷ 50", "mL = 2.5"],
       answer: "2.5 mL",
     },
     {
-      q: "Practice 3: Order is 2 mg. Stock is 50 mg/mL. What mL does the calculator produce (before rounding)?",
-      steps: ["mL = 2 ÷ 50", "mL = 0.04"],
-      answer: "0.04 mL",
+      q: "Practice 3: A reconstituted vial contains 500 mg in a verified final volume of 10 mL. The order is 75 mg. How many mL is required?",
+      steps: ["Step 1: 500 ÷ 10 = 50 mg/mL", "Step 2: mL = 75 ÷ 50", "mL = 1.5"],
+      answer: "1.5 mL",
     },
     {
-      q: "Practice 4: Order is 125 mg. Stock is 40 mg/mL. What is the volume (to 2 decimals)?",
-      steps: ["mL = 125 ÷ 40", "mL = 3.125", "Rounded to 2 decimals = 3.13 mL"],
+      q: "Practice 4: A liquid antibiotic label says 125 mg/5 mL. The ordered dose is 250 mg. How many mL is required?",
+      steps: ["Step 1: 125 ÷ 5 = 25 mg/mL", "Step 2: mL = 250 ÷ 25", "mL = 10"],
+      answer: "10 mL",
+    },
+    {
+      q: "Practice 5: You draw up 2 mL from a 50 mg/mL solution. How many mg is that?",
+      steps: ["mg = mL × (mg/mL)", "mg = 2 × 50", "mg = 100"],
+      answer: "100 mg",
+    },
+    {
+      q: "Practice 6: Order is 125 mg. Stock is 40 mg/mL. What is the volume to 2 decimals?",
+      steps: ["mL = 125 ÷ 40", "mL = 3.125", "Displayed to 2 decimals = 3.13 mL"],
       answer: "3.13 mL",
     },
   ]
@@ -238,77 +305,68 @@ export default function MgToMlPage() {
           <h1 className="mb-2 text-3xl font-bold sm:text-4xl tracking-tight text-gray-900 text-center">mg to mL Calculator for Medicine</h1>
 
           {/* Calculator */}
-          <section id="calculator" className="calculator-tool mb-8 rounded-2xl border border-cyan-200 bg-white p-4 shadow-sm sm:p-8">
+          <section id="calculator" className="mb-8 scroll-mt-24">
             <MgToMlClient />
           </section>
 
-          {/* Authority / reviewer line */}
-          <p className="text-sm text-gray-500 text-center mb-3">
-            Written by <span className="font-semibold text-gray-700">George Lambroglou, RN</span> • Formula checked against listed references • Last reviewed {UPDATED_DATE_HUMAN}
-          </p>
+          <SimpleFormulaAnswer
+            id="simple-mg-to-ml-answer"
+            theme="dose"
+            title="How do you convert mg to mL?"
+            lead={<>Divide the dose you need in mg by the medicine concentration in mg/mL.</>}
+            equation="Volume (mL) = Dose (mg) ÷ Concentration (mg/mL)"
+            spokenEquation="Volume in millilitres equals dose in milligrams divided by concentration in milligrams per millilitre."
+            example={<>500 mg ÷ 50 mg/mL = <strong>10 mL</strong></>}
+            note={<>The concentration must come from the actual medicine label. For example, <strong>50 mg/mL</strong> means that each 1 mL contains 50 mg.</>}
+            className="mb-8"
+          />
 
-          <p className="mb-8 text-lg text-gray-600 text-center">
-            Convert a medicine dose in milligrams (mg) to a measurable volume in millilitres (mL). You need the medication concentration, usually written as mg/mL or mg per 5 mL on the label.
-          </p>
+          <section className="mb-8 grid gap-4 sm:grid-cols-2" aria-label="mg to mL meaning and result">
+            <div className="rounded-2xl border border-cyan-200 bg-cyan-50/60 p-5">
+              <h2 className="text-xl font-bold text-gray-950">What does mg/mL mean?</h2>
+              <p className="mt-2 text-sm leading-6 text-gray-700">
+                <strong>mg/mL means milligrams in each 1 mL.</strong> A strength of 50 mg/mL means 1 mL contains 50 mg of medicine.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-5">
+              <h2 className="text-xl font-bold text-gray-950">What does this calculator do?</h2>
+              <p className="mt-2 text-sm leading-6 text-gray-700">
+                It tells you how many mL contain the dose you need. A result of 10 mL means that dose is contained in 10 mL of that specific medicine strength. A different concentration can give a different volume.
+              </p>
+            </div>
+          </section>
 
-          {/* Intent clarification (helps SEO + user trust) */}
-          <section className="mb-8 rounded-lg border border-gray-200 bg-gray-50 p-5">
-            <p className="text-sm text-gray-700">
-              <span className="font-semibold">Important:</span> mg cannot be converted to mL safely without concentration. For medicine, use the product label concentration, such as <span className="font-semibold">5 mg/mL</span> or <span className="font-semibold">250 mg per 5 mL</span>. This page is for medication dose-to-volume maths, not density-based food or chemistry conversion.
+          <section id="reconstituted-vial" className="mb-8 scroll-mt-24 rounded-2xl border border-cyan-200 bg-cyan-50/60 p-5 sm:p-6">
+            <h2 className="text-xl font-bold text-gray-950">Using a reconstituted vial</h2>
+            <p className="mt-2 text-sm leading-6 text-gray-700">
+              Select <strong>My label says mg per X mL</strong>, then enter the total drug amount and the <strong>verified final vial volume</strong>. The final vial volume can differ from the amount of diluent added because powder displacement may occur.
+            </p>
+            <p className="mt-2 text-sm leading-6 text-gray-700">
+              This calculator checks dose-to-volume arithmetic only. It does not choose the diluent, reconstitution method, route, compatibility, stability, or number of vials required.
             </p>
           </section>
 
-          {/* Jump links */}
-          <div className="mb-10 flex flex-wrap items-center justify-center gap-3">
-            <span className="text-sm text-gray-600">Jump to:</span>
-            <a href="#how-it-works" className="text-cyan-600 hover:text-cyan-700 font-medium text-sm">
-              How it works
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#formula" className="text-cyan-600 hover:text-cyan-700 font-medium text-sm">
-              Formula
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#examples" className="text-cyan-600 hover:text-cyan-700 font-medium text-sm">
-              Examples
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#common-dose-examples" className="text-cyan-600 hover:text-cyan-700 font-medium text-sm">
-              Common searches
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#practice" className="text-cyan-600 hover:text-cyan-700 font-medium text-sm">
-              Practice questions
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#faqs" className="text-cyan-600 hover:text-cyan-700 font-medium text-sm">
-              FAQs
-            </a>
-          </div>
-
+          <CalculatorContentDisclosure
+            id="learning-guide"
+            theme="dose"
+            title="Formula, examples and safety guidance"
+            summary="Review the method, label conversion, worked examples, practice questions, and clinical checks."
+          >
           {/* How it works */}
           <section id="how-it-works" className="mb-12">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">How mg to mL Conversion Works</h2>
-            <div className="space-y-4 text-gray-600 leading-relaxed">
+            <h2 className="mb-6 text-center text-2xl font-bold text-gray-900">How the mg to mL calculation works</h2>
+            <div className="space-y-4 text-gray-700 leading-relaxed">
+              <ol className="list-decimal space-y-3 pl-6">
+                <li>Find the dose needed in <strong>mg</strong>.</li>
+                <li>Find the medicine strength on the label, such as <strong>50 mg/mL</strong>.</li>
+                <li>Divide the dose by the concentration to get the volume in <strong>mL</strong>.</li>
+              </ol>
               <p>
-                A medication order is often written as a dose in <strong>milligrams (mg)</strong>, but you administer a{" "}
-                <strong>volume (mL)</strong>. The bridge between those is the concentration on the label:{" "}
-                <strong>mg per mL (mg/mL)</strong>.
+                When the label says <strong>250 mg in 5 mL</strong>, you can use the nursing formula directly: dose needed ÷ dose on the label × label volume.
               </p>
-              <p>
-                If you know the concentration, the conversion is straightforward: divide the dose (mg) by how many mg are in each mL (mg/mL).
-                That gives you the volume to draw up or prepare.
-              </p>
-              <p>
-                Many labels aren’t written as mg/mL — they’re written as <strong>mg per X mL</strong> (e.g.,{" "}
-                <strong>250 mg/5 mL</strong>). You can convert that label format into mg/mL by dividing the label mg by the label mL, then use the
-                standard formula.
-              </p>
-
               <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Quick checklist:</span> Confirm (1) ordered dose (mg), (2) product concentration (mg/mL or mg per X mL),
-                  (3) you’re using the right product/strength, and (4) your result is practical and measurable according to your local policy.
+                  <span className="font-semibold">Check before using the answer:</span> Make sure the dose and label strength use matching units, and make sure the concentration came from the correct product.
                 </p>
               </div>
             </div>
@@ -316,13 +374,67 @@ export default function MgToMlPage() {
 
           {/* Formula */}
           <section id="formula" className="mb-12">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">Formula</h2>
-            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-700 text-center">
-              <div>mL = mg ÷ (mg/mL)</div>
+            <h2 className="mb-6 text-center text-2xl font-bold text-gray-900">The mg to mL formulas</h2>
+            <div className="space-y-5">
+              <CalculatorEquation
+                id="mg-to-ml-formula"
+                theme="dose"
+                title="mg to mL formula using concentration"
+                equation="Volume (mL) = required dose (mg) ÷ concentration (mg/mL)"
+                spokenEquation="Volume in millilitres equals the required dose in milligrams divided by the concentration in milligrams per millilitre."
+                plainEnglish="Divide the dose you need by how many milligrams are in 1 mL."
+                variables={[
+                  { symbol: "Dose needed", meaning: "the ordered or prescribed amount in mg" },
+                  { symbol: "Concentration", meaning: "how many mg are in 1 mL" },
+                  { symbol: "Volume", meaning: "the answer in mL" },
+                ]}
+              />
+
+              <CalculatorEquation
+                id="required-over-supplied-formula"
+                theme="dose"
+                title="Required dose over supplied dose formula"
+                equation="Volume (mL) = required dose (mg) ÷ supplied dose (mg) × supplied volume (mL)"
+                spokenEquation="Volume in millilitres equals required dose divided by supplied dose, multiplied by supplied volume."
+                plainEnglish="Divide the dose you need by the dose on the label, then multiply by the label volume. This is the same as D/H × Q."
+                variables={[
+                  { symbol: "D", meaning: "the dose needed" },
+                  { symbol: "H", meaning: "the dose printed on the label" },
+                  { symbol: "Q", meaning: "the label volume, such as 5 mL" },
+                ]}
+              />
+
+              <CalculatorEquation
+                id="ml-to-mg-formula"
+                theme="dose"
+                title="mL to mg formula"
+                equation="Dose (mg) = volume (mL) × concentration (mg/mL)"
+                spokenEquation="Dose in milligrams equals volume in millilitres multiplied by concentration in milligrams per millilitre."
+                plainEnglish="Multiply the measured mL by how many milligrams are in 1 mL."
+                variables={[
+                  { symbol: "Volume", meaning: "the measured liquid amount in mL" },
+                  { symbol: "Concentration", meaning: "how many mg are in 1 mL" },
+                  { symbol: "Dose", meaning: "the calculated amount in mg" },
+                ]}
+              />
             </div>
-            <p className="mt-4 text-sm text-gray-600 text-center">
-              If the label is in <strong>mg per X mL</strong>, convert first: <strong>mg/mL = mg ÷ mL</strong>.
-            </p>
+
+            <div className="mt-5 rounded-xl border border-gray-200 bg-gray-50 p-5 text-sm leading-6 text-gray-700">
+              <h3 className="font-bold text-gray-950">Common nursing wording for the same formula</h3>
+              <ul className="mt-2 space-y-1">
+                <li><strong>Required dose ÷ supplied dose × supplied volume or form</strong></li>
+                <li><strong>Desired dose ÷ dose on hand × quantity</strong></li>
+                <li><strong>D/H × Q</strong></li>
+                <li><strong>Stock required over stock supplied, then multiply by the supplied volume or form</strong></li>
+              </ul>
+              <p className="mt-3">The wording changes, but the arithmetic is the same. Write the full equation and match the units before calculating.</p>
+            </div>
+
+            <div className="mt-5 rounded-xl border border-cyan-200 bg-cyan-50 p-5 text-sm leading-6 text-gray-800">
+              <h3 className="font-bold text-gray-950">How to check the units</h3>
+              <p className="mt-2 font-mono">500 mg ÷ 250 mg × 5 mL = 2 × 5 mL = 10 mL</p>
+              <p className="mt-2">The mg units match on both sides of the division, so the answer is left in mL.</p>
+            </div>
           </section>
 
           {/* Worked examples */}
@@ -387,11 +499,18 @@ export default function MgToMlPage() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {[
+                { label: "0.25 mg to mL", dose: "0.25", conc: "1", result: "0.25 mL" },
+                { label: "0.5 mg to mL", dose: "0.5", conc: "1", result: "0.5 mL" },
                 { label: "1 mg to mL", dose: "1", conc: "5", result: "0.2 mL" },
                 { label: "2 mg to mL", dose: "2", conc: "5", result: "0.4 mL" },
-                { label: "2.5 mg to mL", dose: "2.5", conc: "5", result: "0.5 mL" },
+                { label: "2.5 mg to mL syringe", dose: "2.5", conc: "5", result: "0.5 mL" },
                 { label: "5 mg to mL", dose: "5", conc: "5", result: "1 mL" },
                 { label: "10 mg to mL", dose: "10", conc: "5", result: "2 mL" },
+                { label: "12.5 mg to mL", dose: "12.5", conc: "5", result: "2.5 mL" },
+                { label: "25 mg to mL", dose: "25", conc: "5", result: "5 mL" },
+                { label: "50 mg to mL", dose: "50", conc: "50", result: "1 mL" },
+                { label: "100 mg to mL", dose: "100", conc: "50", result: "2 mL" },
+                { label: "250 mg to mL", dose: "250", conc: "50", result: "5 mL" },
                 { label: "500 mg to mL", dose: "500", conc: "50", result: "10 mL" },
               ].map((example) => (
                 <div key={example.label} className="rounded-xl border border-gray-200 bg-white p-4">
@@ -456,7 +575,7 @@ export default function MgToMlPage() {
               </li>
               <li className="flex gap-3">
                 <span className="text-cyan-600 font-bold mt-1">•</span>
-                <span className="text-gray-700">Converting “mg per X mL” labels (e.g., 250 mg/5 mL) into mg/mL</span>
+                <span className="text-gray-700">Converting “mg per X mL” labels and verified reconstituted-vial final volumes into mg/mL</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-cyan-600 font-bold mt-1">•</span>
@@ -477,36 +596,6 @@ export default function MgToMlPage() {
             </p>
           </section>
 
-          {/* Related calculators */}
-          <section className="mb-12">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">Related Calculators</h2>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Link
-                href="/calculator/dose-calculations/mg-to-ml#calculator"
-                className="rounded-lg border border-gray-200 bg-white p-4 hover:border-cyan-300 hover:bg-cyan-50 transition-colors"
-              >
-                <p className="font-medium text-gray-900 hover:text-cyan-600">mL to mg mode</p>
-                <p className="text-xs text-gray-500 mt-1">Convert volume back to dose</p>
-              </Link>
-
-              <Link
-                href="/calculator/dose-calculations/units-to-ml"
-                className="rounded-lg border border-gray-200 bg-white p-4 hover:border-cyan-300 hover:bg-cyan-50 transition-colors"
-              >
-                <p className="font-medium text-gray-900 hover:text-cyan-600">Units to mL</p>
-                <p className="text-xs text-gray-500 mt-1">Unit-based medicine volume</p>
-              </Link>
-
-              <Link
-                href="/calculator/dose-calculations/mgkg-to-ml-dose"
-                className="rounded-lg border border-gray-200 bg-white p-4 hover:border-cyan-300 hover:bg-cyan-50 transition-colors"
-              >
-                <p className="font-medium text-gray-900 hover:text-cyan-600">mg/kg to mL</p>
-                <p className="text-xs text-gray-500 mt-1">Weight-based dosing to volume</p>
-              </Link>
-            </div>
-          </section>
-
           {/* FAQs */}
           <section id="faqs" className="mb-12">
             <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">Frequently Asked Questions</h2>
@@ -514,9 +603,36 @@ export default function MgToMlPage() {
           </section>
 
           {/* References (university + textbook authority) */}
-          <section id="references" className="mb-12">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">References &amp; Study Sources</h2>
-            <p className="mb-8 text-gray-600 text-center text-sm">
+          </CalculatorContentDisclosure>
+
+          <RelatedCalculators
+            theme="dose"
+            title="More medication maths calculators"
+            description="These tools continue from dose-to-volume maths into dilution, tablet, renal, and IV calculation pathways."
+            items={getCalculatorNetworkItems("/calculator/dose-calculations/mg-to-ml")}
+          />
+
+          <CalculatorTrustBlock
+            theme="dose"
+            author={{ name: "George Lambroglou", credentials: "RN", href: "/about" }}
+            lastReviewed={{ iso: UPDATED_DATE_ISO, label: UPDATED_DATE_HUMAN }}
+            note={
+              <>
+                Formula and worked examples checked against the references listed below. MedMaths supports calculation checking and does not replace the medication order, product information, local policy, pharmacy guidance, or clinical judgement.
+              </>
+            }
+            className="mb-12"
+          />
+
+          <CalculatorContentDisclosure
+            id="references"
+            theme="dose"
+            title="References and sources"
+            summary="Open the formula, educational, and safety sources used for this calculator."
+            className="mb-12"
+          >
+<section className="mb-12">
+<p className="mb-8 text-gray-600 text-center text-sm">
               These references support the core dose calculation method and medication math practice used on this page.
             </p>
 
@@ -568,6 +684,9 @@ export default function MgToMlPage() {
               <strong>Clinical Disclaimer:</strong> Always verify vial labels, prescriptions, and local policy. Educational use only.
             </p>
           </section>
+          </CalculatorContentDisclosure>
+
+          
         </div>
       </main>
 

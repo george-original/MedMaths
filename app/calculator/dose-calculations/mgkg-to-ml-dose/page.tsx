@@ -4,12 +4,18 @@ import Link from "next/link"
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { FAQAccordion } from "@/components/faq-accordion"
+import { RelatedCalculators } from "@/components/related-calculators"
+import { getCalculatorNetworkItems } from "@/lib/calculator-network"
+import { CalculatorContentDisclosure, CalculatorTrustBlock } from "@/components/calculator"
 import MgKgToMlDoseClient from "./mgkg-to-ml-dose-client"
 
+const UPDATED_DATE_ISO = "2026-07-30"
+const UPDATED_DATE_HUMAN = "30 July 2026"
+
 export const metadata: Metadata = {
-  title: "mg/kg to mL Calculator | Weight-Based Liquid Dose",
-  description: "Convert a mg/kg medicine order into total mg and mL using patient weight and medication concentration. Includes formula and worked examples.",
-  keywords: ["mg/kg to mL calculator", "mg per kg to ml calculator", "weight based dose calculator", "paediatric dose calculator", "liquid medicine dose calculator", "mg/kg dose volume", "mg/kg", "mg per kg", "weight based", "dose volume", "liquid dose"],
+  title: "mg/kg to mL Calculator | Per Dose or Per Day",
+  description: "Calculate mg/kg to total mg and mL using kg or lb. Supports mg/kg per dose and mg/kg/day with divided doses, plus mg/mL or mg per X mL labels.",
+  keywords: ["mg/kg to mL calculator", "mg per kg to ml calculator", "weight based dose calculator", "paediatric dose calculator", "pediatric dose calculator", "liquid medicine dose calculator", "mg/kg dose formula", "mg/kg to mL formula", "mg/kg per dose", "mg/kg/day", "dose volume", "oral syringe calculation"],
   authors: [{ name: "George Lambroglou, RN", url: "https://www.medmaths.com/about" }],
   creator: "George Lambroglou, RN",
   publisher: "MedMaths",
@@ -26,8 +32,8 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "mg/kg to mL Calculator | Weight-Based Liquid Dose",
-    description: "Convert a mg/kg medicine order into total mg and mL using patient weight and medication concentration. Includes formula and worked examples.",
+    title: "mg/kg to mL Calculator | Per Dose or Per Day",
+    description: "Calculate mg/kg to total mg and mL using kg or lb. Supports mg/kg per dose and mg/kg/day with divided doses, plus mg/mL or mg per X mL labels.",
     url: "https://www.medmaths.com/calculator/dose-calculations/mgkg-to-ml-dose",
     siteName: "MedMaths",
     type: "website",
@@ -35,8 +41,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "mg/kg to mL Calculator | Weight-Based Liquid Dose",
-    description: "Convert a mg/kg medicine order into total mg and mL using patient weight and medication concentration. Includes formula and worked examples.",
+    title: "mg/kg to mL Calculator | Per Dose or Per Day",
+    description: "Calculate mg/kg to total mg and mL using kg or lb. Supports mg/kg per dose and mg/kg/day with divided doses, plus mg/mL or mg per X mL labels.",
   },
 }
 
@@ -44,63 +50,137 @@ export default function MgKgToMlDosePage() {
   const faqItems = [
     {
       question: "What does mg/kg mean?",
-      quickAnswer: "mg/kg means milligrams of medication per kilogram of body weight.",
+      quickAnswer: "mg/kg means milligrams of medicine for each kilogram of the medication weight.",
       details: [
-        "It is a weight-based dosing method (common in paediatrics and some adult meds).",
-        "The ordered number is multiplied by the patient’s weight (kg) to get total mg.",
-        "Example: 10 mg/kg for a 70 kg patient = 700 mg total dose.",
+        "For an order written per dose, multiply mg/kg by weight in kg to calculate mg for one administration.",
+        "For an order written per day, multiply mg/kg/day by weight in kg to calculate the total daily mg before dividing it into the prescribed number of doses.",
       ],
-      microExample: "10 mg/kg × 18 kg = 180 mg",
+      microExample: "10 mg/kg × 20 kg = 200 mg per dose",
+    },
+    {
+      question: "What is the difference between mg/kg per dose and mg/kg/day?",
+      quickAnswer: "Per-dose orders calculate one administration directly; per-day orders calculate a daily total that must be divided by the prescribed number of doses.",
+      details: [
+        "Do not treat mg/kg/day as though it were mg/kg per dose.",
+        "Use the mode that matches the medication order exactly.",
+      ],
+      microExample: "20 mg/kg/day in 4 doses = 5 mg/kg per dose",
     },
     {
       question: "How do I convert mg/kg to mL?",
-      quickAnswer: "Convert mg/kg → total mg, then divide by concentration (mg/mL).",
+      quickAnswer: "Calculate mg per dose, then divide by the medicine concentration in mg/mL.",
       details: [
-        "Step 1: Total dose (mg) = (mg/kg) × weight (kg).",
-        "Step 2: Volume (mL) = total mg ÷ (mg/mL).",
-        "This calculator does both steps automatically.",
+        "Per dose: mg per dose = mg/kg × weight in kg.",
+        "Per day: daily mg = mg/kg/day × weight in kg, then daily mg ÷ doses per day = mg per dose.",
+        "Finally: mL per dose = mg per dose ÷ mg/mL.",
       ],
-      microExample: "(10 mg/kg × 70 kg) ÷ 50 mg/mL = 14 mL",
+      microExample: "(10 mg/kg × 20 kg) ÷ 50 mg/mL = 4 mL",
+    },
+    {
+      question: "Can I enter weight in pounds?",
+      quickAnswer: "Yes. The calculator converts pounds to kilograms before applying the mg/kg formula.",
+      details: [
+        "The exact conversion used is 1 lb = 0.45359237 kg.",
+        "The converted kilogram value is shown in the result working.",
+        "Use the medication weight required by the order or clinical reference.",
+      ],
+      microExample: "44 lb × 0.45359237 = 19.96 kg",
     },
     {
       question: "What if the label says mg per 5 mL?",
-      quickAnswer: "Convert it to mg/mL first by dividing mg by the volume (mL).",
+      quickAnswer: "Enter the label amount and volume, and the calculator converts them to mg/mL.",
       details: [
         "Example label: 250 mg in 5 mL.",
-        "Convert: 250 ÷ 5 = 50 mg/mL.",
-        "Then use 50 mg/mL for the dose-to-volume step.",
+        "Concentration = 250 ÷ 5 = 50 mg/mL.",
       ],
-      microExample: "400 mg in 8 mL → 400 ÷ 8 = 50 mg/mL",
+      microExample: "125 mg/5 mL = 25 mg/mL",
+    },
+    {
+      question: "How are divided daily doses calculated?",
+      quickAnswer: "The total daily mg is divided evenly by the number of prescribed administrations per day.",
+      details: [
+        "The number of doses must come from the medication order or an approved clinical reference.",
+        "The calculator does not choose the frequency or determine whether equal division is clinically appropriate.",
+      ],
+      microExample: "600 mg/day ÷ 3 doses/day = 200 mg per dose",
+    },
+    {
+      question: "Should I use actual, ideal, or adjusted body weight?",
+      quickAnswer: "Use the weight method required by the medicine order, local guideline, or clinical reference.",
+      details: [
+        "This calculator converts the weight entered but does not decide which clinical weight method is appropriate.",
+        "Do not substitute ideal or adjusted body weight unless the relevant reference requires it.",
+      ],
+      microExample: "Enter the documented dosing weight, not an assumed replacement.",
+    },
+    {
+      question: "Does the calculator check maximum doses?",
+      quickAnswer: "No. It performs arithmetic only.",
+      details: [
+        "Check maximum single dose, maximum daily dose, route, frequency, patient factors, and local policy separately.",
+        "A mathematically correct result can still be clinically inappropriate.",
+      ],
+      microExample: "Compare the calculated mg and mL with the medication order and approved reference.",
     },
     {
       question: "Should I round the final mL?",
-      quickAnswer: "Round to your syringe/administration device markings and local policy.",
+      quickAnswer: "Use the precision required by the prescribed device and local medication policy.",
       details: [
-        "For small volumes, rounding can meaningfully change the dose delivered.",
-        "A 1 mL syringe may be marked in 0.01–0.1 mL increments depending on type.",
-        "Use the rounding selector to match your required precision.",
+        "Display rounding does not make a volume clinically measurable or safe.",
+        "Small non-zero values retain enough decimals to remain visible.",
       ],
-      microExample: "1.125 mL → 1.13 mL (2 decimals) or 1.1 mL (1 decimal)",
-    },
-    {
-      question: "Why is mg/kg used so often in paediatrics?",
-      quickAnswer: "Because children’s dosing often scales with body size to improve safety and accuracy.",
-      details: [
-        "Many paediatric doses are prescribed per kg to individualise dosing.",
-        "Always confirm the patient weight is current and in kilograms.",
-        "Check maximum dose limits where applicable.",
-      ],
-      microExample: "Dose ordered: 0.2 mg/kg with a max 10 mg total",
+      microExample: "0.025 mL must not be displayed as 0 mL.",
     },
     {
       question: "Why might my answer differ from another calculator?",
-      quickAnswer: "Differences usually come from rounding, units, or whether the tool includes the mg/kg step.",
+      quickAnswer: "Check the order basis, weight unit, divided-dose count, concentration format, and rounding.",
       details: [
-        "Ensure weight is entered in kg (not lb).",
-        "Verify the concentration is in mg/mL (not mg per 5 mL).",
-        "Compare rounding settings across tools.",
+        "A per-day order entered as per dose can multiply the result by the number of daily administrations.",
+        "Using lb as though it were kg also produces a major error.",
       ],
-      microExample: "14.0 mL vs 13.98 mL (rounding differences)",
+      microExample: "20 mg/kg/day in 4 doses is not 20 mg/kg per dose.",
+    },
+  ]
+
+  const commonExamples = [
+    {
+      question: "10 mg/kg per dose for 20 kg at 50 mg/mL",
+      working: ["Dose = 10 × 20 = 200 mg per dose", "Volume = 200 ÷ 50 = 4 mL per dose"],
+      answer: "4 mL per dose",
+    },
+    {
+      question: "15 mg/kg per dose for 18 kg when the label says 250 mg/5 mL",
+      working: ["Concentration = 250 ÷ 5 = 50 mg/mL", "Dose = 15 × 18 = 270 mg", "Volume = 270 ÷ 50 = 5.4 mL"],
+      answer: "5.4 mL per dose",
+    },
+    {
+      question: "20 mg/kg/day for 20 kg in 4 doses at 25 mg/mL",
+      working: ["Daily dose = 20 × 20 = 400 mg/day", "Per dose = 400 ÷ 4 = 100 mg", "Volume = 100 ÷ 25 = 4 mL"],
+      answer: "4 mL per dose",
+    },
+    {
+      question: "10 mg/kg per dose for 44 lb at 50 mg/mL",
+      working: ["Weight = 44 × 0.45359237 = 19.9581 kg", "Dose = 10 × 19.9581 = 199.581 mg", "Volume = 199.581 ÷ 50 = 3.9916 mL"],
+      answer: "Approximately 3.99 mL per dose",
+    },
+  ]
+
+  const practiceQuestions = [
+    {
+      question: "Order: 8 mg/kg per dose. Weight: 25 kg. Concentration: 40 mg/mL. How many mL per dose?",
+      answer: "8 × 25 = 200 mg. 200 ÷ 40 = 5 mL per dose.",
+    },
+    {
+      question: "Order: 30 mg/kg/day. Weight: 12 kg. Give in 3 divided doses. Concentration: 20 mg/mL. How many mL per dose?",
+      answer: "30 × 12 = 360 mg/day. 360 ÷ 3 = 120 mg per dose. 120 ÷ 20 = 6 mL per dose.",
+    },
+    {
+      question: "Order: 5 mg/kg per dose. Weight: 66 lb. Concentration: 25 mg/mL. How many mL per dose?",
+      answer: "66 lb × 0.45359237 = 29.94 kg. 5 × 29.94 = 149.69 mg. 149.69 ÷ 25 = approximately 5.99 mL per dose.",
+    },
+    {
+      question: "Label: 125 mg/5 mL. What concentration is used in the calculator?",
+      answer: "125 ÷ 5 = 25 mg/mL.",
     },
   ]
 
@@ -153,9 +233,9 @@ export default function MgKgToMlDosePage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            name: "mg/kg to mL Calculator (per dose)",
+            name: "mg/kg to mL Calculator (per dose or per day)",
             description:
-              "Convert a weight-based dose (mg/kg) into millilitres (mL) using medication concentration (mg/mL).",
+              "Convert an mg/kg per-dose or mg/kg/day order into millilitres using kg or lb, divided doses, and medication concentration.",
             applicationCategory: "MedicalApplication",
             operatingSystem: "Web",
             url: "https://www.medmaths.com/calculator/dose-calculations/mgkg-to-ml-dose",
@@ -187,77 +267,63 @@ export default function MgKgToMlDosePage() {
           <h1 className="mb-2 text-3xl font-bold sm:text-4xl tracking-tight text-gray-900 text-center">mg/kg to mL Calculator</h1>
 
           {/* Calculator */}
-          <section id="calculator" className="calculator-tool mb-8 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-8">
+          <section id="calculator" className="mb-8 scroll-mt-24">
             <MgKgToMlDoseClient />
           </section>
-          <p className="mb-4 text-center text-xs text-gray-500">
-            Written by <span className="font-semibold text-gray-700">George Lambroglou, RN</span> • Formula checked against listed references • Last reviewed 21 Jun 2026
-          </p>
+
           <p className="mb-8 text-lg text-gray-600 text-center">
-            Convert an ordered dose in <span className="font-medium text-gray-900">mg/kg</span> into a measurable volume
-            in <span className="font-medium text-gray-900">mL</span> using medication concentration (mg/mL).
+            Calculate a liquid medicine volume from an <span className="font-medium text-gray-900">mg/kg per-dose</span> or
+            <span className="font-medium text-gray-900"> mg/kg/day</span> order, using weight in kg or lb and the exact product concentration.
           </p>
 
-          <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
-            <span className="text-sm text-gray-600">Jump to:</span>
-            <a href="#calculator" className="text-cyan-600 hover:text-cyan-700 font-medium text-sm">
-              Calculator
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#how-it-works" className="text-cyan-600 hover:text-cyan-700 font-medium text-sm">
-              How it works
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#formula" className="text-cyan-600 hover:text-cyan-700 font-medium text-sm">
-              Formula
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#examples" className="text-cyan-600 hover:text-cyan-700 font-medium text-sm">
-              Examples
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#faqs" className="text-cyan-600 hover:text-cyan-700 font-medium text-sm">
-              FAQs
-            </a>
-            <span className="text-gray-300">|</span>
-            <a href="#references" className="text-cyan-600 hover:text-cyan-700 font-medium text-sm">
-              References & Sources
-            </a>
-          </div>
-
-          {/* Calculator (client only) */}
           
-
+          <CalculatorContentDisclosure
+            id="learning-guide"
+            theme="dose"
+            title="Weight-based formula, examples and safety guidance"
+            summary="Review per-dose and per-day formulas, pounds-to-kilograms conversion, worked examples, and safety checks."
+          >
           {/* How it works */}
           <section id="how-it-works" className="mb-12">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">How mg/kg to mL Conversion Works</h2>
+            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">How to Calculate mg/kg to mL</h2>
             <div className="space-y-4 text-gray-600 leading-relaxed">
               <p>
-                A <span className="font-medium text-gray-900">mg/kg</span> order means the dose depends on patient
-                weight. First, multiply the ordered dose (mg/kg) by the patient’s weight (kg) to calculate the{" "}
-                <span className="font-medium text-gray-900">total dose in mg</span>.
+                First match the calculator mode to the order. A per-dose order gives the weight-based amount for one administration.
+                A per-day order gives a daily total that must be divided by the prescribed number of administrations.
               </p>
+              <div className="rounded-xl border border-cyan-100 bg-cyan-50 p-4">
+                <ol className="space-y-3 text-sm text-gray-800">
+                  <li><span className="font-semibold">Step 1:</span> Enter the order as mg/kg per dose or mg/kg/day.</li>
+                  <li><span className="font-semibold">Step 2:</span> Enter the medication weight in kg or lb. Pounds are converted to kg.</li>
+                  <li><span className="font-semibold">Step 3:</span> For a daily order, divide total daily mg by the prescribed doses per day.</li>
+                  <li><span className="font-semibold">Step 4:</span> Divide mg per dose by the concentration in mg/mL to calculate mL per dose.</li>
+                </ol>
+              </div>
               <p>
-                Once you know the total mg, you convert it to a measurable volume by dividing by the medication
-                concentration (<span className="font-medium text-gray-900">mg/mL</span>). If the label is written as{" "}
-                “mg per X mL” (e.g., 250 mg per 5 mL), convert it to mg/mL first by dividing mg by mL.
+                If the label is written as <span className="font-medium text-gray-900">mg per 5 mL</span> or mg per another volume,
+                enter both label values. The calculator converts the label to mg/mL before calculating the dose volume.
               </p>
             </div>
           </section>
 
           {/* Formula */}
           <section id="formula" className="mb-12">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">Formula</h2>
-
+            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">mg/kg to mL Formulas</h2>
             <div className="space-y-3">
               <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-700 text-center">
-                <div>Total mg = (mg/kg) × kg</div>
+                Per dose: mg per dose = mg/kg per dose × weight (kg)
               </div>
               <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-700 text-center">
-                <div>mL = Total mg ÷ (mg/mL)</div>
+                Per day: daily mg = mg/kg/day × weight (kg)
               </div>
               <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-700 text-center">
-                <div>mL = (mg/kg × kg) ÷ (mg/mL)</div>
+                mg per dose = daily mg ÷ doses per day
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-700 text-center">
+                mL per dose = mg per dose ÷ concentration (mg/mL)
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 font-mono text-sm text-gray-700 text-center">
+                Weight conversion: kg = lb × 0.45359237
               </div>
             </div>
           </section>
@@ -265,121 +331,76 @@ export default function MgKgToMlDosePage() {
           {/* Worked examples */}
           <section id="examples" className="mb-12">
             <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">Worked Examples</h2>
-
             <div className="space-y-6">
-              {/* Example 1 */}
-              <div>
-                <div className="mb-4 rounded-lg border-l-4 border-cyan-500 bg-amber-50 p-4">
-                  <p className="font-semibold text-gray-900">
-                    Example 1: Order 10 mg/kg. Weight 70 kg. Concentration 50 mg/mL. How many mL?
-                  </p>
-                </div>
-
-                <div className="mb-3 rounded-lg bg-gray-50 p-4 font-mono text-sm text-gray-700 text-center">
-                  Total mg = 10 × 70 = 700 mg
-                  <br />
-                  mL = 700 ÷ 50 = 14 mL
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex gap-3">
-                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-cyan-600 text-sm font-bold text-white">
-                      1
-                    </div>
-                    <p className="text-sm font-semibold text-gray-900">Total dose = 10 mg/kg × 70 kg = 700 mg</p>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-cyan-600 text-sm font-bold text-white">
-                      2
-                    </div>
-                    <p className="text-sm font-semibold text-gray-900">Volume = 700 mg ÷ 50 mg/mL = 14 mL</p>
-                  </div>
-                </div>
-
-                <div className="mt-3 rounded-lg bg-cyan-50 p-3 text-sm font-semibold text-gray-900 text-center">
-                  Answer: 14 mL
+              <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                <h3 className="font-semibold text-gray-900">Per-dose order</h3>
+                <p className="mt-2 text-sm text-gray-700">Order 10 mg/kg per dose, weight 20 kg, concentration 50 mg/mL.</p>
+                <div className="mt-3 rounded-lg bg-gray-50 p-4 font-mono text-sm text-gray-700">
+                  10 × 20 = 200 mg per dose<br />
+                  200 ÷ 50 = 4 mL per dose
                 </div>
               </div>
 
-              {/* Example 2 */}
-              <div>
-                <div className="mb-4 rounded-lg border-l-4 border-cyan-500 bg-amber-50 p-4">
-                  <p className="font-semibold text-gray-900">
-                    Example 2: Order 15 mg/kg. Weight 18 kg. Label 250 mg in 5 mL. How many mL?
-                  </p>
-                </div>
-
-                <div className="mb-3 rounded-lg bg-gray-50 p-4 font-mono text-sm text-gray-700 text-center">
-                  Convert label: 250 ÷ 5 = 50 mg/mL
-                  <br />
-                  Total mg = 15 × 18 = 270 mg
-                  <br />
-                  mL = 270 ÷ 50 = 5.4 mL
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex gap-3">
-                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-cyan-600 text-sm font-bold text-white">
-                      1
-                    </div>
-                    <p className="text-sm font-semibold text-gray-900">Concentration = 250 mg ÷ 5 mL = 50 mg/mL</p>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-cyan-600 text-sm font-bold text-white">
-                      2
-                    </div>
-                    <p className="text-sm font-semibold text-gray-900">Total dose = 15 mg/kg × 18 kg = 270 mg</p>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-cyan-600 text-sm font-bold text-white">
-                      3
-                    </div>
-                    <p className="text-sm font-semibold text-gray-900">Volume = 270 mg ÷ 50 mg/mL = 5.4 mL</p>
-                  </div>
-                </div>
-
-                <div className="mt-3 rounded-lg bg-cyan-50 p-3 text-sm font-semibold text-gray-900 text-center">
-                  Answer: 5.4 mL
+              <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                <h3 className="font-semibold text-gray-900">Daily order in divided doses</h3>
+                <p className="mt-2 text-sm text-gray-700">Order 20 mg/kg/day, weight 20 kg, four divided doses, concentration 25 mg/mL.</p>
+                <div className="mt-3 rounded-lg bg-gray-50 p-4 font-mono text-sm text-gray-700">
+                  20 × 20 = 400 mg/day<br />
+                  400 ÷ 4 = 100 mg per dose<br />
+                  100 ÷ 25 = 4 mL per dose
                 </div>
               </div>
 
-              {/* Example 3 */}
-              <div>
-                <div className="mb-4 rounded-lg border-l-4 border-cyan-500 bg-amber-50 p-4">
-                  <p className="font-semibold text-gray-900">
-                    Example 3: Order 2.5 mg/kg. Weight 18 kg. Concentration 40 mg/mL. How many mL?
-                  </p>
-                </div>
-
-                <div className="mb-3 rounded-lg bg-gray-50 p-4 font-mono text-sm text-gray-700 text-center">
-                  Total mg = 2.5 × 18 = 45 mg
-                  <br />
-                  mL = 45 ÷ 40 = 1.125 mL
-                  <br />
-                  Rounded (2 decimals) = 1.13 mL
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex gap-3">
-                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-cyan-600 text-sm font-bold text-white">
-                      1
-                    </div>
-                    <p className="text-sm font-semibold text-gray-900">Total dose = 2.5 mg/kg × 18 kg = 45 mg</p>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-cyan-600 text-sm font-bold text-white">
-                      2
-                    </div>
-                    <p className="text-sm font-semibold text-gray-900">Volume = 45 mg ÷ 40 mg/mL = 1.125 mL</p>
-                  </div>
-                </div>
-
-                <div className="mt-3 rounded-lg bg-cyan-50 p-3 text-sm font-semibold text-gray-900 text-center">
-                  Answer: 1.13 mL (rounded)
+              <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                <h3 className="font-semibold text-gray-900">Weight entered in pounds</h3>
+                <p className="mt-2 text-sm text-gray-700">Order 10 mg/kg per dose, weight 44 lb, concentration 50 mg/mL.</p>
+                <div className="mt-3 rounded-lg bg-gray-50 p-4 font-mono text-sm text-gray-700">
+                  44 × 0.45359237 = 19.9581 kg<br />
+                  10 × 19.9581 = 199.581 mg per dose<br />
+                  199.581 ÷ 50 = 3.9916 mL per dose
                 </div>
               </div>
             </div>
           </section>
+
+          {/* Common examples */}
+          <section className="mb-12">
+            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">Common mg/kg to mL Examples</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {commonExamples.map((example) => (
+                <div key={example.question} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                  <h3 className="mb-3 text-sm font-semibold text-gray-900">{example.question}</h3>
+                  <div className="space-y-1 rounded-lg bg-gray-50 p-3 font-mono text-xs text-gray-700">
+                    {example.working.map((line) => (
+                      <div key={line}>{line}</div>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-sm font-semibold text-cyan-700">Answer: {example.answer}</p>
+                </div>
+              ))}
+            </div>
+            <p className="mt-4 text-xs leading-relaxed text-gray-500">
+              These are arithmetic examples only. They are not dose recommendations. Always check the ordered medicine, patient weight, concentration, frequency, and maximum dose limits.
+            </p>
+          </section>
+
+          {/* Practice questions */}
+          <section id="practice" className="mb-12">
+            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">Practice Questions</h2>
+            <div className="space-y-4">
+              {practiceQuestions.map((item, index) => (
+                <details key={item.question} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                  <summary className="cursor-pointer font-semibold text-gray-900">
+                    Question {index + 1}: {item.question}
+                  </summary>
+                  <p className="mt-3 rounded-lg bg-cyan-50 p-3 text-sm text-gray-800">
+                    <span className="font-semibold">Answer:</span> {item.answer}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </section>
+
 
           {/* When used */}
           <section className="mb-12">
@@ -387,19 +408,19 @@ export default function MgKgToMlDosePage() {
             <ul className="space-y-3">
               <li className="flex gap-3">
                 <span className="text-cyan-600 font-bold mt-1">•</span>
-                <span className="text-gray-700">Weight-based dosing (mg/kg), especially paediatrics</span>
+                <span className="text-gray-700">Weight-based liquid dosing written per dose or per day</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-cyan-600 font-bold mt-1">•</span>
-                <span className="text-gray-700">Converting a total calculated dose (mg) to a measurable volume (mL)</span>
+                <span className="text-gray-700">Converting kg or lb into the kilogram weight required by an mg/kg formula</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-cyan-600 font-bold mt-1">•</span>
-                <span className="text-gray-700">Converting “mg per X mL” labels into mg/mL before calculation</span>
+                <span className="text-gray-700">Dividing an mg/kg/day order into the prescribed number of doses</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-cyan-600 font-bold mt-1">•</span>
-                <span className="text-gray-700">Medication preparation checks and double-checking arithmetic</span>
+                <span className="text-gray-700">Converting a calculated mg amount into mL using mg/mL or mg per X mL labels</span>
               </li>
             </ul>
           </section>
@@ -407,40 +428,9 @@ export default function MgKgToMlDosePage() {
           {/* Safety note */}
           <section className="mb-12 rounded-lg border border-yellow-200 bg-yellow-50 p-6">
             <p className="text-sm text-gray-800">
-              <span className="font-semibold">Clinical safety note:</span> Always confirm the ordered dose, patient weight
-              (kg), product concentration, and local protocols. This calculator supports calculation checking but does
-              not replace clinical judgement.
+              <span className="font-semibold">Clinical safety note:</span> Always confirm whether the order is written per dose or per day, the prescribed number of divided doses, the required medication weight, product concentration, maximum-dose limits, route, and local protocols.
+              This calculator supports calculation checking but does not recommend doses or replace clinical judgement.
             </p>
-          </section>
-
-          {/* Related calculators */}
-          <section className="mb-12">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">Related Calculators</h2>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Link
-                href="/calculator/dose-calculations/mg-to-ml"
-                className="rounded-lg border border-gray-200 bg-white p-4 hover:border-cyan-300 hover:bg-cyan-50 transition-colors"
-              >
-                <p className="font-medium text-gray-900 hover:text-cyan-600">mg to mL</p>
-                <p className="text-xs text-gray-500 mt-1">Dose (mg) to volume conversion</p>
-              </Link>
-
-              <Link
-                href="/calculator/dose-calculations/units-to-ml"
-                className="rounded-lg border border-gray-200 bg-white p-4 hover:border-cyan-300 hover:bg-cyan-50 transition-colors"
-              >
-                <p className="font-medium text-gray-900 hover:text-cyan-600">Units to mL</p>
-                <p className="text-xs text-gray-500 mt-1">Convert ordered units to liquid volume.</p>
-              </Link>
-
-              <Link
-                href="/calculator/tablet-dosing/mg-to-tablets"
-                className="rounded-lg border border-gray-200 bg-white p-4 hover:border-cyan-300 hover:bg-cyan-50 transition-colors"
-              >
-                <p className="font-medium text-gray-900 hover:text-cyan-600">mg to Tablets</p>
-                <p className="text-xs text-gray-500 mt-1">Convert an ordered dose to tablet count.</p>
-              </Link>
-            </div>
           </section>
 
           {/* FAQs */}
@@ -450,9 +440,36 @@ export default function MgKgToMlDosePage() {
           </section>
 
           {/* References — GOLDEN STANDARD LAYOUT */}
-          <section id="references" className="mb-12">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 text-center">References & Sources</h2>
-            <p className="mb-8 text-gray-600 text-center text-sm">
+          </CalculatorContentDisclosure>
+
+          <RelatedCalculators
+            theme="dose"
+            title="Related weight-based dose calculators"
+            description="Use these calculators when a weight-based dose needs another dosing check, body-size estimate, or route conversion."
+            items={getCalculatorNetworkItems("/calculator/dose-calculations/mgkg-to-ml-dose")}
+          />
+
+          <CalculatorTrustBlock
+            theme="dose"
+            author={{ name: "George Lambroglou", credentials: "RN", href: "/about" }}
+            lastReviewed={{ iso: UPDATED_DATE_ISO, label: UPDATED_DATE_HUMAN }}
+            note={
+              <>
+                Formula and worked examples checked against the references listed below. MedMaths supports calculation checking and does not replace the medication order, product information, maximum-dose checks, local policy, pharmacy guidance, or clinical judgement.
+              </>
+            }
+            className="mb-12"
+          />
+
+          <CalculatorContentDisclosure
+            id="references"
+            theme="dose"
+            title="References and sources"
+            summary="Open the formula, educational, and safety sources used for this calculator."
+            className="mb-12"
+          >
+<section className="mb-12">
+<p className="mb-8 text-gray-600 text-center text-sm">
               This calculator follows standard medication calculation methods used in nursing and prescribing education,
               including weight-based dosing (mg/kg) and dose-to-volume conversion (mg/mL).
             </p>
@@ -460,25 +477,48 @@ export default function MgKgToMlDosePage() {
             {/* International Standards */}
             <div className="mb-8">
               <h3 className="mb-4 text-lg font-semibold text-gray-900">International Standards</h3>
-              <div className="rounded-lg border border-gray-200 bg-white p-4 hover:shadow-md transition-shadow">
-                <a
-                  href="https://www.bipm.org/en/publications/si-brochure"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-start justify-between gap-4 group"
-                >
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-900 group-hover:text-cyan-600">
-                      The International System of Units (SI) – SI Brochure{" "}
-                      <span className="text-xs bg-gray-100 px-2 py-1 rounded ml-2">BIPM</span>
-                    </p>
-                    <p className="text-sm text-gray-600 mt-1">BIPM (Bureau International des Poids et Mesures)</p>
-                    <p className="text-xs text-gray-500 mt-2">
-                      Authoritative reference for SI units and prefixes used in clinical calculations.
-                    </p>
-                  </div>
-                  <span className="text-gray-400 group-hover:text-cyan-600 text-lg mt-1">↗</span>
-                </a>
+              <div className="space-y-3">
+                <div className="rounded-lg border border-gray-200 bg-white p-4 hover:shadow-md transition-shadow">
+                  <a
+                    href="https://www.bipm.org/en/publications/si-brochure"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start justify-between gap-4 group"
+                  >
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 group-hover:text-cyan-600">
+                        The International System of Units (SI) – SI Brochure{" "}
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded ml-2">BIPM</span>
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">BIPM (Bureau International des Poids et Mesures)</p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Authoritative reference for SI units and prefixes used in clinical calculations.
+                      </p>
+                    </div>
+                    <span className="text-gray-400 group-hover:text-cyan-600 text-lg mt-1">↗</span>
+                  </a>
+                </div>
+
+                <div className="rounded-lg border border-gray-200 bg-white p-4 hover:shadow-md transition-shadow">
+                  <a
+                    href="https://openstax.org/books/pharmacology/pages/2-4-dosage-calculations"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start justify-between gap-4 group"
+                  >
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 group-hover:text-cyan-600">
+                        Dosage Calculations – Pharmacology for Nurses{" "}
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded ml-2">OpenStax</span>
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">OpenStax</p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Explains the desired dose, dose on hand, and quantity method used in medication calculation education.
+                      </p>
+                    </div>
+                    <span className="text-gray-400 group-hover:text-cyan-600 text-lg mt-1">↗</span>
+                  </a>
+                </div>
               </div>
             </div>
 
@@ -543,6 +583,27 @@ export default function MgKgToMlDosePage() {
                       <p className="text-sm text-gray-600 mt-1">RMIT Learning Lab (Nursing)</p>
                       <p className="text-xs text-gray-500 mt-2">
                         Explains stock strength/stock volume concepts behind dose-to-volume calculations.
+                      </p>
+                    </div>
+                    <span className="text-gray-400 group-hover:text-cyan-600 text-lg mt-1">↗</span>
+                  </a>
+                </div>
+
+                <div className="rounded-lg border border-gray-200 bg-white p-4 hover:shadow-md transition-shadow">
+                  <a
+                    href="https://www.safetyandquality.gov.au/clinical-topics/medicines-safety-and-quality/high-risk-medicines-and-systems"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start justify-between gap-4 group"
+                  >
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 group-hover:text-cyan-600">
+                        High risk medicines and systems{" "}
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded ml-2">Web page</span>
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">Australian Commission on Safety and Quality in Health Care</p>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Australian medication safety reference for high-risk medicine systems and APINCHS classification.
                       </p>
                     </div>
                     <span className="text-gray-400 group-hover:text-cyan-600 text-lg mt-1">↗</span>
@@ -647,6 +708,9 @@ export default function MgKgToMlDosePage() {
               </div>
             </div>
           </section>
+          </CalculatorContentDisclosure>
+
+          
         </div>
       </main>
 

@@ -27,7 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     return {
       url: page.url,
-      lastModified: (page as any).lastReviewed ? new Date((page as any).lastReviewed) : undefined,
+      lastModified: page.lastReviewed ? new Date(page.lastReviewed) : undefined,
       changeFrequency,
       priority,
     }

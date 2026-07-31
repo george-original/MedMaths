@@ -66,14 +66,19 @@ function toPath(input: string): string {
 // ---------- Registry ----------
 export const registry = seoRegistry as SeoRegistry
 
-export const mostUsedCalculators =
-  (mostUsedSeed as any)?.mostUsedSeed && Array.isArray((mostUsedSeed as any).mostUsedSeed)
-    ? (mostUsedSeed as any).mostUsedSeed
-    : []
+type MostUsedSeedFile = {
+  mostUsedSeed?: unknown
+}
+
+const parsedMostUsedSeed = mostUsedSeed as MostUsedSeedFile
+
+export const mostUsedCalculators = Array.isArray(parsedMostUsedSeed.mostUsedSeed)
+  ? parsedMostUsedSeed.mostUsedSeed.filter((value): value is string => typeof value === "string")
+  : []
 
 function isIndexablePage(page: PageMetadata): boolean {
   const robots = safeLower(page.robots)
-  return !robots.includes("noindex") && !(page as any).excludeFromSitemap
+  return !robots.includes("noindex") && !page.excludeFromSitemap
 }
 
 function isSearchVisiblePage(page: PageMetadata): boolean {
@@ -113,9 +118,9 @@ export function getAllCategories(): PageMetadata[] {
 function normalizePage(page: PageMetadata): PageMetadata {
   return {
     ...page,
-    secondaryKeywords: asStringArray((page as any).secondaryKeywords),
-    synonyms: asStringArray((page as any).synonyms),
-    schema: asStringArray((page as any).schema),
+    secondaryKeywords: asStringArray(page.secondaryKeywords),
+    synonyms: asStringArray(page.synonyms),
+    schema: asStringArray(page.schema),
   }
 }
 

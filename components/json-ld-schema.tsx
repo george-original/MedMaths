@@ -1,5 +1,5 @@
 interface JsonLdSchemaProps {
-  schema: Record<string, any>
+  schema: Record<string, unknown>
 }
 
 export function JsonLdSchema({ schema }: JsonLdSchemaProps) {
@@ -11,16 +11,9 @@ export function generateWebsiteSchema() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "MedMaths",
+    alternateName: ["Med Maths", "MedMaths calculators", "Med Maths calculators", "medical maths calculators"],
     url: "https://www.medmaths.com",
-    description: "Focused medication maths calculators for dose conversions, tablet dosing, IV drip rates, dilutions, dosing body measures, and renal dosing support.",
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: "https://www.medmaths.com/calculators?search={search_term_string}",
-      },
-      "query-input": "required name=search_term_string",
-    },
+    description: "MedMaths, also searched as Med Maths, provides focused medication maths calculators for dose conversions, tablet dosing, IV drip rates, dilutions, dosing body measures, and renal dosing support.",
   }
 }
 
@@ -89,6 +82,7 @@ export function generateOrganizationSchema() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "MedMaths",
+    alternateName: ["Med Maths", "MedMaths calculators", "Med Maths calculators"],
     url: "https://www.medmaths.com",
     logo: "https://www.medmaths.com/medmaths-logo.png",
     contactPoint: {

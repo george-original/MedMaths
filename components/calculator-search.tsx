@@ -13,6 +13,7 @@ import {
   normalizeSearchTerm,
 } from "@/lib/seo-utils"
 import type { PageMetadata } from "@/lib/seo-utils"
+import { calculatorCatalog } from "@/lib/calculator-catalog"
 
 type Group = { categoryName: string; items: PageMetadata[] }
 
@@ -114,7 +115,8 @@ export function CalculatorSearch() {
     for (const calc of list) {
       const key = (calc.categoryKey || "").trim()
       const categoryData = categories.find((cat) => (cat.url || "").includes(key))
-      const categoryName = categoryData?.displayName || (key ? key : "Other")
+      const catalogueCategory = calculatorCatalog.find((category) => category.slug === key)
+      const categoryName = categoryData?.displayName || catalogueCategory?.name || (key ? key : "Other")
 
       const existing = groups.find((g) => g.categoryName === categoryName)
       if (existing) existing.items.push(calc)
