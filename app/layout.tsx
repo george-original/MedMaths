@@ -1,5 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
+import { GoogleAnalytics } from "@next/third-parties/google"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -66,6 +67,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans antialiased">{children}</body>
+      <GoogleAnalytics gaId="G-W2SZ301ZGT" />
     </html>
   )
 }
