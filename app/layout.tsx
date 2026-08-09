@@ -1,5 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
+import Script from "next/script"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -64,6 +65,19 @@ export default function RootLayout({
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1935059419471624"
           crossOrigin="anonymous"
         />
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-8NHRWHDMH3"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-8NHRWHDMH3');
+          `}
+        </Script>
       </head>
       <body className="font-sans antialiased">{children}</body>
     </html>
